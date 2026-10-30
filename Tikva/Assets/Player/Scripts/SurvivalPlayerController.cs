@@ -7,6 +7,8 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     [Header("Mode")]
     [Tooltip("Enable for WASD + mouse + Space. The model is hidden only for the player camera.")]
     public bool firstPerson;
+    [Header("Current right-hand item (empty when free)")]
+    public string currentHeldItem="";
     public bool EffectiveFirstPerson => firstPerson || (cameraRig && cameraRig.AutomaticFirstPerson);
     public bool tankControlsIndoors=true;
     public bool tankControlsOutdoors=true;
