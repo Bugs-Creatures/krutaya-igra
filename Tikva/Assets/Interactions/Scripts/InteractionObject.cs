@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public enum InteractionKind { Pickup, Door }
+public enum InteractionKind { Pickup, Door, Talk }
 
 public sealed class InteractionObject : MonoBehaviour
 {

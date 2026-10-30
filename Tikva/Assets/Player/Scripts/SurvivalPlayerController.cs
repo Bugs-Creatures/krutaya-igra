@@ -7,6 +7,47 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     [Header("Mode")]
     [Tooltip("Enable for WASD + mouse + Space. The model is hidden only for the player camera.")]
     public bool firstPerson;
+    [System.NonSerialized] public bool dialogueLocked;
+    [System.NonSerialized] public int dialogueClickFrame=-1;
+    public bool ShopReturning {get;private set;}
+    Vector3 shopReturnStart,shopReturnEnd,shopLookTarget;
+    Quaternion shopStartRotation;
+    float shopStartPitch,shopReturnTime,shopReturnDuration;
+    public void BeginShopReturn(Vector3 destination,Vector3 lookTarget,float duration)
+    {
+        if(ShopReturning)return;
+        ShopReturning=true;shopReturnStart=transform.position;shopReturnEnd=destination;
+        shopLookTarget=lookTarget;shopReturnTime=0;shopReturnDuration=Mathf.Max(.1f,duration);
+        shopStartRotation=transform.rotation;shopStartPitch=pitch;
+        inputLatched=false;heldForward=Vector3.zero;
+        if(!EffectiveFirstPerson)FaceDialogueTarget(lookTarget);
+        if(animator){animator.SetBool(walkingParameter,false);animator.SetBool("isWalkingBackward",false);animator.SetBool("isRunning",false);}
+    }
+    public void AdvanceShopReturn(float dt)
+    {
+        if(!ShopReturning)return;
+        if(!controller)controller=GetComponent<CharacterController>();
+        shopReturnTime+=dt;
+        float t=Mathf.SmoothStep(0,1,Mathf.Clamp01(shopReturnTime/shopReturnDuration));
+        Vector3 desired=Vector3.Lerp(shopReturnStart,shopReturnEnd,t);
+        controller.Move(desired-transform.position);
+        if(EffectiveFirstPerson)
+        {
+            Vector3 direction=shopLookTarget-(transform.position+Vector3.up*1.6f);
+            Vector3 flat=Vector3.ProjectOnPlane(direction,Vector3.up);
+            if(flat.sqrMagnitude>.001f)transform.rotation=Quaternion.Slerp(shopStartRotation,Quaternion.LookRotation(flat),t);
+            pitch=Mathf.LerpAngle(shopStartPitch,-Mathf.Atan2(direction.y,flat.magnitude)*Mathf.Rad2Deg,t);
+        }
+        if(shopReturnTime>=shopReturnDuration){ShopReturning=false;verticalSpeed=0;inputLatched=false;}
+    }
+    public void FaceDialogueTarget(Vector3 target)
+    {
+        Vector3 d=target-(transform.position+Vector3.up*1.6f);
+        var flat=Vector3.ProjectOnPlane(d,Vector3.up);
+        if(flat.sqrMagnitude>.001f)transform.rotation=Quaternion.LookRotation(flat);
+        if(EffectiveFirstPerson)pitch=-Mathf.Atan2(d.y,flat.magnitude)*Mathf.Rad2Deg;
+        inputLatched=false;
+    }
     [Header("Current right-hand item (empty when free)")]
     public string currentHeldItem="";
     public bool EffectiveFirstPerson => firstPerson || (cameraRig && cameraRig.AutomaticFirstPerson);
@@ -55,6 +96,8 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     }
     void Update()
     {
+        if(ShopReturning){AdvanceShopReturn(Time.deltaTime);return;}
+        if(dialogueLocked){Move(Vector2.zero,Vector2.zero,false,false,Time.deltaTime);return;}
         if(appliedMode!=EffectiveFirstPerson)ApplyMode();
         var k=Keyboard.current;var m=Mouse.current;if(k==null)return;
         if(k.escapeKey.wasPressedThisFrame){Cursor.lockState=CursorLockMode.None;Cursor.visible=true;}
