@@ -7,6 +7,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     [Header("Mode")]
     [Tooltip("Enable for WASD + mouse + Space. The model is hidden only for the player camera.")]
     public bool firstPerson;
+    public bool EffectiveFirstPerson => firstPerson || (cameraRig && cameraRig.AutomaticFirstPerson);
     public bool tankControlsIndoors=true;
     public bool tankControlsOutdoors=true;
     [Header("Movement")]
@@ -45,20 +46,20 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     }
     void ApplyMode()
     {
-        appliedMode=firstPerson;heldForward=Vector3.zero;inputLatched=false;
+        appliedMode=EffectiveFirstPerson;heldForward=Vector3.zero;inputLatched=false;
         cameraRig.SetFirstPerson(firstPerson);
-        for(int i=0;i<modelRenderers.Length;i++)if(modelRenderers[i])modelRenderers[i].forceRenderingOff=firstPerson||rendererStates[i];
-        Cursor.lockState=firstPerson?CursorLockMode.Locked:CursorLockMode.None;Cursor.visible=!firstPerson;
+        for(int i=0;i<modelRenderers.Length;i++)if(modelRenderers[i])modelRenderers[i].forceRenderingOff=EffectiveFirstPerson||rendererStates[i];
+        Cursor.lockState=EffectiveFirstPerson?CursorLockMode.Locked:CursorLockMode.None;Cursor.visible=!EffectiveFirstPerson;
     }
     void Update()
     {
-        if(appliedMode!=firstPerson)ApplyMode();
+        if(appliedMode!=EffectiveFirstPerson)ApplyMode();
         var k=Keyboard.current;var m=Mouse.current;if(k==null)return;
         if(k.escapeKey.wasPressedThisFrame){Cursor.lockState=CursorLockMode.None;Cursor.visible=true;}
-        if(firstPerson && m!=null && m.leftButton.wasPressedThisFrame){Cursor.lockState=CursorLockMode.Locked;Cursor.visible=false;}
+        if(EffectiveFirstPerson && m!=null && m.leftButton.wasPressedThisFrame){Cursor.lockState=CursorLockMode.Locked;Cursor.visible=false;}
         Vector2 axes=new Vector2((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));
-        Vector2 look=firstPerson && Cursor.lockState==CursorLockMode.Locked && m!=null?m.delta.ReadValue():Vector2.zero;
-        Move(axes,look,firstPerson&&k.spaceKey.wasPressedThisFrame,k.leftShiftKey.isPressed,Time.deltaTime);
+        Vector2 look=EffectiveFirstPerson && Cursor.lockState==CursorLockMode.Locked && m!=null?m.delta.ReadValue():Vector2.zero;
+        Move(axes,look,EffectiveFirstPerson&&k.spaceKey.wasPressedThisFrame,k.leftShiftKey.isPressed,Time.deltaTime);
     }
     // Also available for deterministic play-mode verification.
     public void Move(Vector2 axes,Vector2 look,bool jump,bool run,float dt)
@@ -74,10 +75,10 @@ public sealed class SurvivalPlayerController : MonoBehaviour
             heldForward=Vector3.ProjectOnPlane(cameraRig.output.transform.forward,Vector3.up).normalized;
             heldRight=Vector3.Cross(Vector3.up,heldForward);inputLatched=true;
         }
-        bool tank=!firstPerson && (inputLatched?latchedTank:cameraRig.IsIndoors?tankControlsIndoors:tankControlsOutdoors);
+        bool tank=!EffectiveFirstPerson && (inputLatched?latchedTank:cameraRig.IsIndoors?tankControlsIndoors:tankControlsOutdoors);
         if(!tank)axes=Vector2.ClampMagnitude(axes,1);
         Vector3 direction;
-        if(firstPerson)
+        if(EffectiveFirstPerson)
         {
             transform.Rotate(0,look.x*mouseSensitivity,0);pitch=Mathf.Clamp(pitch-look.y*mouseSensitivity,-80,80);
             direction=transform.forward*axes.y+transform.right*axes.x;
@@ -100,7 +101,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
         if(jump && controller.isGrounded)verticalSpeed=Mathf.Sqrt(2*gravity*jumpHeight);
         verticalSpeed=Mathf.Max(verticalSpeed-gravity*dt,-35);
         Vector3 before=transform.position;
-        bool backward=(firstPerson||tank) && axes.y<-.1f;
+        bool backward=(EffectiveFirstPerson||tank) && axes.y<-.1f;
         bool running=run && !backward;
         float speed=walkSpeed*(backward?backwardSpeedMultiplier:running?runMultiplier:1);
         controller.Move((direction*speed+Vector3.up*verticalSpeed)*dt);
@@ -113,7 +114,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
             animator.SetBool("isRunning",moving && running);
         }
     }
-    void LateUpdate()=>cameraRig.UpdateView(Time.deltaTime,pitch);
+    void LateUpdate(){cameraRig.UpdateView(Time.deltaTime,pitch);if(appliedMode!=EffectiveFirstPerson)ApplyMode();}
     void OnDisable()
     {
         if(rendererStates!=null)for(int i=0;i<modelRenderers.Length;i++)if(modelRenderers[i])modelRenderers[i].forceRenderingOff=rendererStates[i];
@@ -121,3 +122,4 @@ public sealed class SurvivalPlayerController : MonoBehaviour
         Cursor.lockState=CursorLockMode.None;Cursor.visible=true;
     }
 }
+
