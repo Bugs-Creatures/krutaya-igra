@@ -7,7 +7,6 @@ public sealed class InteractionPrompt : MonoBehaviour
     public TMP_FontAsset font;
     public Texture2D linkCursor;
     public Texture2D defaultCursor;
-    [Min(8)] public float cursorDisplaySize=20;
     public Vector2 defaultHotspot=new Vector2(2,2);
     public Vector2 itemHotspot=new Vector2(11,2);
     [Min(0)] public float textHoldSeconds=.55f;
@@ -15,7 +14,6 @@ public sealed class InteractionPrompt : MonoBehaviour
     RectTransform canvasRect,tooltip;
     TextMeshProUGUI label;
     UnityEngine.UI.Image reticle;
-    UnityEngine.UI.RawImage cursorImage;
     CanvasGroup tooltipGroup;
     float feedbackSeconds;
     bool handShown;
@@ -41,21 +39,25 @@ public sealed class InteractionPrompt : MonoBehaviour
         var dot=new GameObject("First person aim",typeof(RectTransform),typeof(UnityEngine.UI.Image));dot.transform.SetParent(transform,false);
         reticle=dot.GetComponent<UnityEngine.UI.Image>();reticle.raycastTarget=false;reticle.color=new Color(1,1,1,.75f);
         var dr=(RectTransform)dot.transform;dr.sizeDelta=new Vector2(3,3);dr.anchoredPosition=Vector2.zero;
-        var cursorObject=new GameObject("Game cursor",typeof(RectTransform),typeof(UnityEngine.UI.RawImage));
-        cursorObject.transform.SetParent(transform,false);cursorImage=cursorObject.GetComponent<UnityEngine.UI.RawImage>();
-        cursorImage.raycastTarget=false;cursorImage.rectTransform.pivot=new Vector2(0,1);
         UseDefaultCursor();
     }
     public void UseDefaultCursor()
     {
         activeCursor=defaultCursor;handShown=false;
+        ApplyCursor();
     }
     public void SetInteractionCursor(bool hand)
     {
         var cursor=hand?linkCursor:defaultCursor;
         if(hand==handShown&&cursor==activeCursor)return;
         activeCursor=cursor;handShown=hand;
+        ApplyCursor();
     }
+    void ApplyCursor()
+    {
+        Cursor.SetCursor(activeCursor,activeCursor?(handShown?itemHotspot:defaultHotspot):Vector2.zero,CursorMode.Auto);
+    }
+    void OnApplicationFocus(bool focused){if(focused)ApplyCursor();}
     public void Present(InteractionObject item,Vector2 screen,bool firstPerson)
     {
         if(!tooltip)return;
@@ -100,27 +102,6 @@ public sealed class InteractionPrompt : MonoBehaviour
     {
         ClearFeedback();
         Cursor.SetCursor(null,Vector2.zero,CursorMode.Auto);Cursor.visible=true;handShown=false;
-        if(cursorImage)cursorImage.enabled=false;
-    }
-    void LateUpdate()
-    {
-        if(!cursorImage)return;
-        var mouse=UnityEngine.InputSystem.Mouse.current;
-        bool visible=Application.isFocused&&Cursor.lockState!=CursorLockMode.Locked&&mouse!=null;
-        cursorImage.enabled=visible;
-        if(!Application.isFocused)return;
-        if(Cursor.visible)Cursor.visible=false;
-        if(!visible)return;
-        cursorImage.texture=activeCursor;
-        cursorImage.transform.SetAsLastSibling();
-        float scale=Mathf.Max(.001f,GetComponent<Canvas>().scaleFactor);
-        float aspect=activeCursor?(float)activeCursor.width/activeCursor.height:1;
-        var displaySize=new Vector2(cursorDisplaySize*aspect,cursorDisplaySize);
-        cursorImage.rectTransform.sizeDelta=displaySize/scale;
-        Vector2 hotspot=Vector2.Scale((handShown?itemHotspot:defaultHotspot)/24f,displaySize);
-        Vector2 position=mouse.position.ReadValue()+new Vector2(-hotspot.x,hotspot.y);
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect,position,null,out var local);
-        cursorImage.rectTransform.anchoredPosition=local;
     }
     void OnDestroy()
     {

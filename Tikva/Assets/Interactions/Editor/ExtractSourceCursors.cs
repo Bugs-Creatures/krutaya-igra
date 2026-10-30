@@ -27,8 +27,7 @@ public static class ExtractSourceCursors
         string path="Assets/Interactions/Cursors/CursorSource.png";Import(path);var source=AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         Extract(source,0,source.width/2,"SourceArrow");Extract(source,source.width/2,source.width,"SourceHand");
         InstallInteractionIcons.Apply();
-        var hud=Object.FindAnyObjectByType<InteractionPrompt>();hud.defaultHotspot=FindTip(hud.defaultCursor);hud.itemHotspot=FindTip(hud.linkCursor);
-        UnityEditor.EditorUtility.SetDirty(hud);UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(hud.gameObject.scene);UnityEditor.SceneManagement.EditorSceneManager.SaveScene(hud.gameObject.scene);
+        HardwareCursorSetup.Apply();
     }
     static Vector2 FindTip(Texture2D texture)
     {

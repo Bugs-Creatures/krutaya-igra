@@ -33,3 +33,13 @@
 Для EntranceDoor петля уже создана. Crowbar отмечен как Suspicious, Screwdriver — обычный предмет. Collider остаётся на двери и следует за ней при открытии. Обводка не изменяет исходные материалы и не проходит сквозь стены.
 
 Проверка Play Mode: InteractionChecks.Run().
+
+## Звуки
+
+Все клипы необязательные: пустое поле означает тишину.
+
+- `Player` → `Player Movement Audio`: `Footstep Sound` — одиночный шаг, `Landing Sound` — приземление. `Walk Step Interval` / `Run Step Interval` — время между шагами в секундах. `Volume` — громкость.
+- Каждый предмет (`vodka`, `crowbar`, `screwdriver`) → `Interaction Object` → `Sounds (optional)` → `Drop Sound`: удар о поверхность после сброса из руки, один раз за падение.
+- `EntranceDoor` → `Interaction Object` → `Open Sound` / `Close Sound`: открытие / закрытие. `Sound Volume` — громкость предмета или двери.
+
+AudioSource создаётся автоматически только при проигрывании назначенного клипа. Для новых предметов и дверей используются те же поля Interaction Object.

@@ -28,6 +28,11 @@ public sealed class InteractionObject : MonoBehaviour
     public Vector3 hingeAxis=Vector3.up;
     public float openAngle=90;
     public float openingDuration=.45f;
+    [Header("Sounds (optional)")]
+    public AudioClip dropSound;
+    public AudioClip openSound;
+    public AudioClip closeSound;
+    [Range(0,1)] public float soundVolume=.8f;
     public bool IsHeld {get;private set;}
     public bool IsOpen {get;private set;}
     public string ItemName=>string.IsNullOrWhiteSpace(displayName)?name:displayName;
@@ -48,6 +53,8 @@ public sealed class InteractionObject : MonoBehaviour
     Vector3 worldScale;
     RigidbodyInterpolation originalInterpolation;
     bool originalDetectCollisions;
+    bool dropSoundArmed;
+    AudioSource soundSource;
     void Awake()
     {
         Outline=GetComponent<InteractionOutline>();if(!Outline)Outline=gameObject.AddComponent<InteractionOutline>();
@@ -64,10 +71,30 @@ public sealed class InteractionObject : MonoBehaviour
         float t=Mathf.SmoothStep(0,1,openAmount);
         hinge.localRotation=closedRotation*Quaternion.AngleAxis(openAngle*t,hingeAxis.normalized);
     }
-    public void ToggleDoor(){if(kind==InteractionKind.Door)IsOpen=!IsOpen;}
+    public void ToggleDoor()
+    {
+        if(kind!=InteractionKind.Door)return;
+        IsOpen=!IsOpen;PlaySound(IsOpen?openSound:closeSound);
+    }
+    void PlaySound(AudioClip clip)
+    {
+        if(!clip)return;
+        if(!soundSource)
+        {
+            soundSource=gameObject.AddComponent<AudioSource>();soundSource.playOnAwake=false;
+            soundSource.spatialBlend=.6f;soundSource.rolloffMode=AudioRolloffMode.Linear;soundSource.minDistance=1;soundSource.maxDistance=35;
+        }
+        soundSource.PlayOneShot(clip,soundVolume);
+    }
+    void OnCollisionEnter(Collision collision)
+    {
+        if(!dropSoundArmed||IsHeld||kind!=InteractionKind.Pickup||collision.relativeVelocity.sqrMagnitude<.04f)return;
+        dropSoundArmed=false;PlaySound(dropSound);
+    }
     public void Attach(Transform anchor,bool firstPerson=false)
     {
         if(IsHeld||kind!=InteractionKind.Pickup||!anchor)return;
+        dropSoundArmed=false;
         if(Outline)Outline.Show(false,PlayerInteraction.AvailableOutlineColor);
         if(body)
         {
@@ -111,6 +138,6 @@ public sealed class InteractionObject : MonoBehaviour
         // from the rigidbody's old floor position or its previous hand position.
         body.interpolation=RigidbodyInterpolation.None;
         body.position=point;body.rotation=transform.rotation;body.interpolation=originalInterpolation;
-        body.linearVelocity=Vector3.zero;body.angularVelocity=Vector3.zero;IsHeld=false;
+        body.linearVelocity=Vector3.zero;body.angularVelocity=Vector3.zero;IsHeld=false;dropSoundArmed=true;
     }
 }

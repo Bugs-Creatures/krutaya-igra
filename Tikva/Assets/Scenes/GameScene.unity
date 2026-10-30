@@ -75432,6 +75432,10 @@ MonoBehaviour:
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
   openingDuration: 0.45
+  dropSound: {fileID: 0}
+  openSound: {fileID: 0}
+  closeSound: {fileID: 0}
+  soundVolume: 0.8
 --- !u!114 &927555098
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77809,6 +77813,10 @@ MonoBehaviour:
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
   openingDuration: 0.45
+  dropSound: {fileID: 0}
+  openSound: {fileID: 0}
+  closeSound: {fileID: 0}
+  soundVolume: 0.8
 --- !u!1 &954791789
 GameObject:
   m_ObjectHideFlags: 0
@@ -81344,6 +81352,10 @@ MonoBehaviour:
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
   openingDuration: 0.45
+  dropSound: {fileID: 0}
+  openSound: {fileID: 0}
+  closeSound: {fileID: 0}
+  soundVolume: 0.8
 --- !u!1 &991362804
 GameObject:
   m_ObjectHideFlags: 0
@@ -83941,6 +83953,10 @@ MonoBehaviour:
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
   openingDuration: 0.45
+  dropSound: {fileID: 0}
+  openSound: {fileID: 0}
+  closeSound: {fileID: 0}
+  soundVolume: 0.8
 --- !u!1 &1018876169
 GameObject:
   m_ObjectHideFlags: 0
@@ -87490,6 +87506,10 @@ MonoBehaviour:
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
   openingDuration: 0.45
+  dropSound: {fileID: 0}
+  openSound: {fileID: 0}
+  closeSound: {fileID: 0}
+  soundVolume: 0.8
 --- !u!114 &1062073895
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149151,11 +149171,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractionPrompt
   font: {fileID: 0}
-  linkCursor: {fileID: 2800000, guid: d01f86952c8e61042829e290e790d3e2, type: 3}
-  defaultCursor: {fileID: 2800000, guid: 8b23cdf3c4e20e34f8b35e4b9503bbe7, type: 3}
-  cursorDisplaySize: 24
-  defaultHotspot: {x: 2.2122905, y: 2.5665722}
-  itemHotspot: {x: 8.905785, y: 1.5435686}
+  linkCursor: {fileID: 2800000, guid: 4b04d2189a1e95240ad625372adc411b, type: 3}
+  defaultCursor: {fileID: 2800000, guid: 93545772a78290a46bb5a404ad6aad36, type: 3}
+  defaultHotspot: {x: 4, y: 5}
+  itemHotspot: {x: 8, y: 4}
   textHoldSeconds: 0.55
   textFadeSeconds: 0.45
 --- !u!223 &1761698810
@@ -179704,6 +179723,7 @@ GameObject:
   - component: {fileID: 1790034895847241103}
   - component: {fileID: 1790034895847241102}
   - component: {fileID: 1790034895847241104}
+  - component: {fileID: 1790034895847241105}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -179813,6 +179833,24 @@ MonoBehaviour:
   turnRotationLag: 0.025
   motionSmoothTime: 0.12
   prompt: {fileID: 1761698809}
+--- !u!114 &1790034895847241105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1790034895847241100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c10ef7c648fe0764eb39259400245dd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementAudio
+  footstepSound: {fileID: 0}
+  landingSound: {fileID: 0}
+  walkStepInterval: 0.48
+  runStepInterval: 0.3
+  minimumAirTime: 0.12
+  volume: 0.75
 --- !u!4 &1893488007860753771
 Transform:
   m_ObjectHideFlags: 0

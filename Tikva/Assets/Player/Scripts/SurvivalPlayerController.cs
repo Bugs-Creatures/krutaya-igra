@@ -67,6 +67,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     public Renderer[] modelRenderers;
     public string walkingParameter="isWalking";
     CharacterController controller;
+    PlayerMovementAudio movementAudio;
     float verticalSpeed,pitch;
     bool appliedMode;
     bool[] rendererStates;
@@ -77,10 +78,11 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     public void Teleport(Vector3 point)
     {
         var cc=GetComponent<CharacterController>();cc.enabled=false;transform.position=point;cc.enabled=true;verticalSpeed=0;inputLatched=false;heldForward=Vector3.zero;
+        if(movementAudio)movementAudio.ResetMotion();
     }
     void Awake()
     {
-        controller=GetComponent<CharacterController>();walkingHash=Animator.StringToHash(walkingParameter);
+        controller=GetComponent<CharacterController>();movementAudio=GetComponent<PlayerMovementAudio>();walkingHash=Animator.StringToHash(walkingParameter);
         if(!animator)animator=GetComponentInChildren<Animator>();
         if(animator)animator.applyRootMotion=false;
         if(modelRenderers==null||modelRenderers.Length==0)modelRenderers=GetComponentsInChildren<Renderer>();
@@ -150,7 +152,9 @@ public sealed class SurvivalPlayerController : MonoBehaviour
         bool running=run && !backward;
         float speed=walkSpeed*(backward?backwardSpeedMultiplier:running?runMultiplier:1);
         controller.Move((direction*speed+Vector3.up*verticalSpeed)*dt);
-        Vector3 actual=transform.position-before;actual.y=0;
+        Vector3 actual=transform.position-before;
+        if(movementAudio)movementAudio.ProcessMovement(actual,controller.isGrounded,running,dt);
+        actual.y=0;
         if(animator)
         {
             bool moving=actual.sqrMagnitude>.000001f;
