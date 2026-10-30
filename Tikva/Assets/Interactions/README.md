@@ -38,7 +38,6 @@
 
 Все клипы необязательные: пустое поле означает тишину.
 
-- `Player` → `Player Movement Audio`: `Footstep Sound` — одиночный шаг, `Landing Sound` — приземление. `Walk Step Interval` / `Run Step Interval` — время между шагами в секундах. `Volume` — громкость.
 - Каждый предмет (`vodka`, `crowbar`, `screwdriver`) → `Interaction Object` → `Sounds (optional)` → `Drop Sound`: удар о поверхность после сброса из руки, один раз за падение.
 - `EntranceDoor` → `Interaction Object` → `Open Sound` / `Close Sound`: открытие / закрытие. `Sound Volume` — громкость предмета или двери.
 

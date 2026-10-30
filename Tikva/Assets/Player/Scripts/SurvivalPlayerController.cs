@@ -67,22 +67,24 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     public Renderer[] modelRenderers;
     public string walkingParameter="isWalking";
     CharacterController controller;
-    PlayerMovementAudio movementAudio;
     float verticalSpeed,pitch;
     bool appliedMode;
     bool[] rendererStates;
     Vector3 heldForward,heldRight;
     int walkingHash;
     bool inputLatched,latchedTank;
+    bool wasInAirAnimation;
+    bool jumpInProgress;
     public void SetFirstPerson(bool value){firstPerson=value;if(Application.isPlaying)ApplyMode();}
     public void Teleport(Vector3 point)
     {
         var cc=GetComponent<CharacterController>();cc.enabled=false;transform.position=point;cc.enabled=true;verticalSpeed=0;inputLatched=false;heldForward=Vector3.zero;
-        if(movementAudio)movementAudio.ResetMotion();
+        jumpInProgress=false;wasInAirAnimation=false;
+        if(animator)animator.SetBool("isJumping",false);
     }
     void Awake()
     {
-        controller=GetComponent<CharacterController>();movementAudio=GetComponent<PlayerMovementAudio>();walkingHash=Animator.StringToHash(walkingParameter);
+        controller=GetComponent<CharacterController>();walkingHash=Animator.StringToHash(walkingParameter);
         if(!animator)animator=GetComponentInChildren<Animator>();
         if(animator)animator.applyRootMotion=false;
         if(modelRenderers==null||modelRenderers.Length==0)modelRenderers=GetComponentsInChildren<Renderer>();
@@ -145,19 +147,28 @@ public sealed class SurvivalPlayerController : MonoBehaviour
             if(direction.sqrMagnitude>.001f)transform.rotation=Quaternion.RotateTowards(transform.rotation,Quaternion.LookRotation(direction),turnSpeed*dt);
         }
         if(controller.isGrounded && verticalSpeed<0)verticalSpeed=-2;
-        if(jump && controller.isGrounded)verticalSpeed=Mathf.Sqrt(2*gravity*jumpHeight);
+        if(jump && EffectiveFirstPerson && controller.isGrounded)
+        {
+            verticalSpeed=Mathf.Sqrt(2*gravity*jumpHeight);
+            jumpInProgress=true;
+        }
         verticalSpeed=Mathf.Max(verticalSpeed-gravity*dt,-35);
         Vector3 before=transform.position;
         bool backward=(EffectiveFirstPerson||tank) && axes.y<-.1f;
         bool running=run && !backward;
         float speed=walkSpeed*(backward?backwardSpeedMultiplier:running?runMultiplier:1);
         controller.Move((direction*speed+Vector3.up*verticalSpeed)*dt);
+        if(jumpInProgress&&verticalSpeed<=0&&controller.isGrounded)jumpInProgress=false;
         Vector3 actual=transform.position-before;
-        if(movementAudio)movementAudio.ProcessMovement(actual,controller.isGrounded,running,dt);
         actual.y=0;
         if(animator)
         {
-            bool moving=actual.sqrMagnitude>.000001f;
+            bool inAir=jumpInProgress;
+            animator.SetBool("isJumping",inAir);
+            if(inAir&&!wasInAirAnimation&&animator.HasState(0,Animator.StringToHash("Base Layer.Jump")))
+                animator.Play("Base Layer.Jump",0,0);
+            wasInAirAnimation=inAir;
+            bool moving=!inAir&&actual.sqrMagnitude>.000001f;
             animator.SetBool(walkingHash,moving);
             animator.SetBool("isWalkingBackward",moving && backward);
             animator.SetBool("isRunning",moving && running);
@@ -166,6 +177,8 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     void LateUpdate(){cameraRig.UpdateView(Time.deltaTime,pitch);if(appliedMode!=EffectiveFirstPerson)ApplyMode();}
     void OnDisable()
     {
+        jumpInProgress=false;wasInAirAnimation=false;
+        if(animator)animator.SetBool("isJumping",false);
         if(rendererStates!=null)for(int i=0;i<modelRenderers.Length;i++)if(modelRenderers[i])modelRenderers[i].forceRenderingOff=rendererStates[i];
         if(animator){animator.SetBool(walkingParameter,false);animator.SetBool("isWalkingBackward",false);animator.SetBool("isRunning",false);}
         Cursor.lockState=CursorLockMode.None;Cursor.visible=true;
