@@ -15,6 +15,8 @@ public sealed class OutdoorTrackingCamera : MonoBehaviour
     public float maximumDistance=80;
     [Range(20,180)] public float maximumPan=130;
     public LayerMask sightBlockers=~0;
+    [Tooltip("Check whether colliders block the player. Disable to use camera areas and blind-zone triggers without raycasts.")]
+    public bool checkPhysicalVisibility=false;
     public Camera Shot=>GetComponent<Camera>();
     Quaternion trackedRotation;
     float trackedFov;
@@ -33,6 +35,7 @@ public sealed class OutdoorTrackingCamera : MonoBehaviour
         Vector3 delta=feet+Vector3.up-transform.position;
         if(delta.magnitude>maximumDistance||delta.magnitude<.5f)return false;
         if(Mathf.Abs(Vector3.SignedAngle(Vector3.ProjectOnPlane(transform.forward,Vector3.up),Vector3.ProjectOnPlane(delta,Vector3.up),Vector3.up))>maximumPan)return false;
+        if(!checkPhysicalVisibility)return true;
         // At least one meaningful part of the actor must be visible.
         foreach(float height in new[]{.6f,1.1f,1.65f})
         {

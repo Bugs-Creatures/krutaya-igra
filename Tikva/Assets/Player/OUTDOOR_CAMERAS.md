@@ -43,3 +43,6 @@
 
 Дополнительная entrance_camera перед домом — фиксированный ракурс дорожки к входу (X от -3 до 3 м, Z от 2 до 9,6 м). Прежняя entrance_camera внутри подъезда сохранена и имеет приоритет на стыке зон. У новой камеры отключён OutdoorTrackingCamera, включён FixedCameraZone с отдельным Volume.
 
+
+Физическая проверка перекрытия игрока отключена на уличных камерах. Для возврата включите Check Physical Visibility в OutdoorTrackingCamera. Зоны покрытия, Maximum Distance/Maximum Pan и триггеры CameraBlindZone продолжают работать независимо от этой галочки.
+
