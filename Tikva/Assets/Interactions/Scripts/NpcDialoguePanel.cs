@@ -11,6 +11,7 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     readonly TextMeshProUGUI[] answers=new TextMeshProUGUI[2];
     string phrase;float letters,delay;Action<int> choice;Action finished;
     CursorLockMode oldLock;bool oldVisible;
+    bool blocksInput;
     public bool IsOpen=>root&&root.gameObject.activeSelf;
     RectTransform Rect(string name,Transform parent,Vector2 size,Vector2 position)
     {
@@ -29,11 +30,16 @@ public sealed class NpcDialoguePanel : MonoBehaviour
         for(int n=0;n<2;n++)answers[n]=Text(root,new Vector2(900,38),new Vector2(0,-5-42*n));
         root.gameObject.SetActive(false);
     }
-    public void Begin()
+    public void Begin(bool blockInput=true)
     {
-        Ensure();oldLock=Cursor.lockState;oldVisible=Cursor.visible;
-        interaction.player.dialogueLocked=true;interaction.prompt.ClearFeedback();interaction.prompt.Present(null,Vector2.zero,false);
-        Cursor.lockState=CursorLockMode.None;Cursor.visible=true;interaction.prompt.UseDefaultCursor();root.gameObject.SetActive(true);
+        Ensure();blocksInput=blockInput;
+        if(blocksInput)
+        {
+            oldLock=Cursor.lockState;oldVisible=Cursor.visible;
+            interaction.player.dialogueLocked=true;interaction.prompt.ClearFeedback();interaction.prompt.Present(null,Vector2.zero,false);
+            Cursor.lockState=CursorLockMode.None;Cursor.visible=true;interaction.prompt.UseDefaultCursor();
+        }
+        root.gameObject.SetActive(true);
     }
     public void Say(string text,string first=null,string second=null,Action<int> selected=null,float hold=1,Action complete=null)
     {
@@ -42,7 +48,7 @@ public sealed class NpcDialoguePanel : MonoBehaviour
         choice=selected;finished=complete;delay=hold;
         answers[0].text=first??"";answers[1].text=second??"";
         foreach(var answer in answers){answer.gameObject.SetActive(false);answer.color=Color.white;}
-        interaction.prompt.SetInteractionCursor(false);
+        if(blocksInput)interaction.prompt.SetInteractionCursor(false);
     }
     void Update()
     {
@@ -69,8 +75,12 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     }
     public void End()
     {
-        if(!root)return;root.gameObject.SetActive(false);choice=null;finished=null;interaction.player.dialogueLocked=false;interaction.player.dialogueClickFrame=Time.frameCount;
-        Cursor.lockState=oldLock;Cursor.visible=oldVisible;interaction.prompt.UseDefaultCursor();
+        if(!IsOpen)return;root.gameObject.SetActive(false);choice=null;finished=null;
+        if(blocksInput)
+        {
+            interaction.player.dialogueLocked=false;interaction.player.dialogueClickFrame=Time.frameCount;
+            Cursor.lockState=oldLock;Cursor.visible=oldVisible;interaction.prompt.UseDefaultCursor();
+        }
     }
     void OnDisable(){if(IsOpen)End();}
 }

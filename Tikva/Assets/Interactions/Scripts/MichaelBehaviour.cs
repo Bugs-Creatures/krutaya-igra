@@ -33,10 +33,14 @@ public sealed class MichaelBehaviour : MonoBehaviour, ITalkTarget
     public void Talk()
     {
         var player=Object.FindAnyObjectByType<SurvivalPlayerController>();if(InConversation||player.dialogueLocked||player.modalInputLocked)return;
+        if(learned)
+        {
+            if(dialogue.IsOpen)return;
+            dialogue.Begin(false);dialogue.Say("Майкл: Ещё раз спасибо!",hold:2);return;
+        }
         InConversation=true;animator.SetBool("isWalking",false);animator.speed=1;
         var direction=player.transform.position-transform.position;direction.y=0;if(direction.sqrMagnitude>.001f)transform.rotation=Quaternion.LookRotation(direction);
         dialogue.Begin();
-        if(learned){dialogue.Say("Майкл: Ещё раз спасибо!",hold:2,complete:Finish);return;}
         dialogue.Say("Майкл: Что-то случилось?","Ты как-то странно ходишь.","Не важно.",FirstChoice);
     }
     void FirstChoice(int choice)
