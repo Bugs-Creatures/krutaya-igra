@@ -35,7 +35,7 @@ public sealed class DrunkDialogue : MonoBehaviour, ITalkTarget
         if(reward&&!given)reward.gameObject.SetActive(false);
         panel=Rect("Drunk dialogue",interaction.prompt.transform,new Vector2(650,160),new Vector2(0,115));
         speechBackground=Rect("Speech background",panel,new Vector2(610,40),new Vector2(0,45));
-        speechBackground.gameObject.AddComponent<UnityEngine.UI.Image>().color=new Color(.025f,.025f,.025f,.92f);
+        speechBackground.gameObject.AddComponent<UnityEngine.UI.Image>().color=new Color(.025f,.025f,.025f,1);
         text=Label(speechBackground,"",new Vector2(590,32),Vector2.zero);
         text.alignment=TextAlignmentOptions.Center;
         giveButton=Rect("Give",panel,new Vector2(290,36),new Vector2(0,-5));
@@ -97,6 +97,7 @@ public sealed class DrunkDialogue : MonoBehaviour, ITalkTarget
         reward.transform.position=point;reward.gameObject.SetActive(true);
         var body=reward.GetComponent<Rigidbody>();
         if(body){body.position=point;body.isKinematic=false;body.useGravity=true;body.linearVelocity=(transform.forward+Vector3.up)*rewardThrow;}
+        reward.RecordNpcDrop();
     }
     void Update()
     {
@@ -121,3 +122,4 @@ public sealed class DrunkDialogue : MonoBehaviour, ITalkTarget
     }
     void OnDisable(){if(player)player.dialogueLocked=false;if(panel)panel.gameObject.SetActive(false);}
 }
+

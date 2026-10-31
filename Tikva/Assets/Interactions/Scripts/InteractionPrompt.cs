@@ -32,7 +32,7 @@ public sealed class InteractionPrompt : MonoBehaviour
         var panel=new GameObject("Interaction tooltip",typeof(RectTransform),typeof(UnityEngine.UI.Image),typeof(CanvasGroup));panel.SetActive(false);panel.transform.SetParent(transform,false);
         tooltip=(RectTransform)panel.transform;tooltip.pivot=new Vector2(0,1);tooltip.sizeDelta=new Vector2(300,40);
         tooltipGroup=panel.GetComponent<CanvasGroup>();tooltipGroup.blocksRaycasts=false;tooltipGroup.interactable=false;
-        panel.GetComponent<UnityEngine.UI.Image>().color=new Color(.03f,.03f,.03f,.85f);panel.GetComponent<UnityEngine.UI.Image>().raycastTarget=false;
+        panel.GetComponent<UnityEngine.UI.Image>().color=new Color(.03f,.03f,.03f,1);panel.GetComponent<UnityEngine.UI.Image>().raycastTarget=false;
         var text=new GameObject("Action",typeof(RectTransform));text.SetActive(false);text.transform.SetParent(panel.transform,false);
         label=text.AddComponent<TextMeshProUGUI>();label.font=font;label.fontSize=22;label.raycastTarget=false;label.textWrappingMode=TextWrappingModes.NoWrap;
         var rect=(RectTransform)text.transform;rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=new Vector2(10,5);rect.offsetMax=new Vector2(-10,-4);text.SetActive(true);
@@ -66,13 +66,13 @@ public sealed class InteractionPrompt : MonoBehaviour
         SetInteractionCursor(hand);
         if(tooltip.gameObject.activeSelf)PlaceTooltip(screen);
     }
-    public void ShowClickFeedback(InteractionObject item,Vector2 screen,bool firstPerson,bool inReach)
+    public void ShowClickFeedback(InteractionObject item,Vector2 screen,bool firstPerson,bool inReach,string overrideText=null)
     {
         if(!item||!tooltip)return;
         tooltip.gameObject.SetActive(true);
         feedbackSeconds=Mathf.Max(0,textHoldSeconds)+Mathf.Max(.01f,textFadeSeconds);
         tooltipGroup.alpha=1;
-        label.text=item.Prompt(firstPerson,inReach);label.fontSize=item.hoverTextSize;
+        label.text=overrideText??item.Prompt(firstPerson,inReach);label.fontSize=item.hoverTextSize;
         label.color=item.kind==InteractionKind.Talk&&!inReach?Color.white:item.Allowed(firstPerson)?new Color(1,.9f,.25f):new Color(1,.32f,.27f);
         Vector2 preferred=label.GetPreferredValues(label.text);
         tooltip.sizeDelta=new Vector2(Mathf.Ceil(preferred.x)+20,Mathf.Ceil(preferred.y)+9);
@@ -108,3 +108,4 @@ public sealed class InteractionPrompt : MonoBehaviour
         if(ownsFont&&font){foreach(var atlas in font.atlasTextures)if(atlas)Destroy(atlas);if(font.material)Destroy(font.material);Destroy(font);}
     }
 }
+

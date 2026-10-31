@@ -39,7 +39,7 @@ public static class StyleSuspiciousReference
         if(EditorApplication.isPlaying)throw new System.Exception("Exit Play Mode first");
         var hud=Object.FindAnyObjectByType<PlayerTutorialHud>();view=hud.suspiciousCard;var root=(RectTransform)view.transform;
         Undo.RegisterFullObjectHierarchyUndo(view.gameObject,"Style Suspicious tutorial");
-        Place(root,new Vector2(900,460),Vector2.zero);var bg=root.GetComponent<UnityEngine.UI.Image>();bg.color=new Color(.035f,.035f,.032f,.97f);bg.pixelsPerUnitMultiplier=8;
+        Place(root,new Vector2(900,460),Vector2.zero);var bg=root.GetComponent<UnityEngine.UI.Image>();bg.color=new Color(.035f,.035f,.032f,1);bg.pixelsPerUnitMultiplier=8;
         var outline=OutlineSprite();Border("Reference border",root,outline);
         var header=root.Find("Reference header");TextMeshProUGUI headerText;
         if(!header)headerText=GameHudUI.Text("Reference header",root,view.body.font,"ПАМЯТКА",14,new Color(.6f,.6f,.57f),new Vector2(150,30),new Vector2(-345,195));else headerText=header.GetComponent<TextMeshProUGUI>();
@@ -54,12 +54,13 @@ public static class StyleSuspiciousReference
         Place(view.title.rectTransform,new Vector2(515,70),new Vector2(150,105));view.title.fontSize=24;view.title.fontStyle=FontStyles.Bold;view.title.alignment=TextAlignmentOptions.MidlineLeft;view.title.text="ПОДОЗРИТЕЛЬНЫЕ ПРЕДМЕТЫ";view.title.color=new Color(.91f,.91f,.87f);
         Place(view.body.rectTransform,new Vector2(500,180),new Vector2(155,-30));view.body.fontSize=21;view.body.alignment=TextAlignmentOptions.TopLeft;view.body.lineSpacing=7;view.body.color=new Color(.88f,.88f,.85f);
         view.body.text="<color=#B44943>Подозрительные</color> предметы можно подбирать и носить только вне камер. Если с таким предметом всё-таки попасть на камеру, то персонаж его принудительно уронит.";
-        var frame=(RectTransform)view.placeholder.transform.parent;Place(frame,new Vector2(220,270),new Vector2(-300,0));frame.GetComponent<UnityEngine.UI.Image>().color=new Color(.065f,.065f,.06f,.5f);
+        var frame=(RectTransform)view.placeholder.transform.parent;Place(frame,new Vector2(220,270),new Vector2(-300,0));frame.GetComponent<UnityEngine.UI.Image>().color=new Color(.065f,.065f,.06f,1);
         var bounds=(RectTransform)view.picture.transform.parent;Place(bounds,new Vector2(210,260),Vector2.zero);view.picture.texture=null;view.picture.enabled=false;hud.suspiciousImage=null;
         Place(view.placeholder.rectTransform,new Vector2(210,35),Vector2.zero);view.placeholder.fontSize=13;view.placeholder.characterSpacing=2;view.placeholder.color=new Color(.4f,.4f,.38f);view.placeholder.gameObject.SetActive(true);
-        Place(view.actionButton,new Vector2(160,36),new Vector2(337,-202));var button=view.actionButton.GetComponent<UnityEngine.UI.Image>();button.color=new Color(.04f,.04f,.036f,.8f);button.pixelsPerUnitMultiplier=8;Border("Reference button border",view.actionButton,outline);
+        Place(view.actionButton,new Vector2(160,36),new Vector2(337,-202));var button=view.actionButton.GetComponent<UnityEngine.UI.Image>();button.color=new Color(.04f,.04f,.036f,1);button.pixelsPerUnitMultiplier=8;Border("Reference button border",view.actionButton,outline);
         Place(view.actionText.rectTransform,new Vector2(154,34),Vector2.zero);view.actionText.fontSize=18;view.actionText.fontStyle=FontStyles.Normal;view.actionText.color=new Color(.9f,.9f,.86f);
         foreach(var component in root.GetComponentsInChildren<Component>(true))if(component)EditorUtility.SetDirty(component);
         EditorUtility.SetDirty(hud);EditorSceneManager.MarkSceneDirty(root.gameObject.scene);EditorSceneManager.SaveScene(root.gameObject.scene);AssetDatabase.SaveAssets();
     }
 }
+

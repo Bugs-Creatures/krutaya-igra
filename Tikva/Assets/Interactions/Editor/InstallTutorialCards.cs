@@ -13,7 +13,7 @@ public static class InstallTutorialCards
     {var image=GameHudUI.Image(r,c);image.sprite=rounded;image.type=UnityEngine.UI.Image.Type.Sliced;}
     static TutorialCardView Make(string name,Transform parent,string heading,string content)
     {
-        var card=R(name,parent,new Vector2(800,590),Vector2.zero);Background(card,new Color(.07f,.07f,.07f,.99f));
+        var card=R(name,parent,new Vector2(800,590),Vector2.zero);Background(card,new Color(.07f,.07f,.07f,1));
         var view=card.gameObject.AddComponent<TutorialCardView>();
         view.title=T("Title",card,heading,22,Color.white,new Vector2(580,36),new Vector2(0,250));view.title.fontStyle=FontStyles.Bold;
         view.counter=T("Page counter",card,"1/1",16,new Color(.7f,.7f,.7f),new Vector2(90,35),new Vector2(-325,250));
@@ -63,3 +63,4 @@ public static class InstallTutorialCards
         EditorUtility.SetDirty(hud);EditorSceneManager.MarkSceneDirty(root.scene);EditorSceneManager.SaveScene(root.scene);AssetDatabase.SaveAssets();
     }
 }
+

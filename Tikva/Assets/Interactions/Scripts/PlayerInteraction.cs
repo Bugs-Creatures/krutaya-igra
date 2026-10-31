@@ -65,11 +65,14 @@ public sealed class PlayerInteraction : MonoBehaviour
     }
     public bool TryInteract(InteractionObject item)
     {
-        if(player.modalInputLocked||player.dialogueLocked||!item||!item.Allowed(player.EffectiveFirstPerson)||!InReach(item))return false;
+        if(player.modalInputLocked||player.dialogueLocked||!item||!item.isActiveAndEnabled||!item.Allowed(player.EffectiveFirstPerson)||!InReach(item))return false;
+        if(item.kind==InteractionKind.ToolAction){var action=item.GetComponent<ToolActionTarget>();return action&&action.TryUse(this);}
         if(item.kind==InteractionKind.Talk){var talk=item.GetComponent<ITalkTarget>();if(talk!=null)talk.Talk();return true;}
         if(item.kind==InteractionKind.Door){item.ToggleDoor();return true;}
         var map=item.GetComponent<MapItem>();
         if(map){SetHovered(null);map.Collect(this);return true;}
+        var crafting=GetComponent<RopeHookCrafting>();
+        if(crafting&&crafting.TryCombine(this,item)){SetHovered(null);return true;}
         var firstPerson=player.EffectiveFirstPerson;
         var anchor=AnchorForMode(firstPerson);if(!anchor)return false;
         DropHeld();item.Attach(anchor,firstPerson);heldItem=item;player.currentHeldItem=item.ItemName;SetHovered(null);
@@ -87,6 +90,11 @@ public sealed class PlayerInteraction : MonoBehaviour
             return false;
         }
         bool succeeded=TryInteract(item);
+        if(!succeeded&&item.kind==InteractionKind.ToolAction)
+        {
+            var action=item.GetComponent<ToolActionTarget>();
+            if(action&&!string.IsNullOrEmpty(action.LastFailure)&&prompt)prompt.ShowClickFeedback(item,screen,firstPerson,inReach,action.LastFailure);
+        }
         if(succeeded&&prompt)prompt.ClearFeedback();
         return succeeded;
     }

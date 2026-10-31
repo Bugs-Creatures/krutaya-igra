@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public enum InteractionKind { Pickup, Door, Talk }
+public enum InteractionKind { Pickup, Door, Talk, ToolAction }
 
 public sealed class InteractionObject : MonoBehaviour
 {
@@ -37,8 +37,13 @@ public sealed class InteractionObject : MonoBehaviour
     public bool IsOpen {get;private set;}
     public bool HasBeenPickedUpByPlayer {get;private set;}
     public bool IsDroppedByPlayer {get;private set;}
-    public void RecordPlayerPickup(){HasBeenPickedUpByPlayer=true;IsDroppedByPlayer=false;}
+    public bool IsDroppedByNpc {get;private set;}
+    public bool IsDroppedByCrafting {get;private set;}
+    public bool IsSearchableDrop=>IsDroppedByPlayer||IsDroppedByNpc||IsDroppedByCrafting;
+    public void RecordPlayerPickup(){HasBeenPickedUpByPlayer=true;IsDroppedByPlayer=false;IsDroppedByNpc=false;IsDroppedByCrafting=false;}
     public void RecordPlayerDrop(){if(HasBeenPickedUpByPlayer)IsDroppedByPlayer=true;}
+    public void RecordNpcDrop(){IsDroppedByNpc=true;}
+    public void RecordCraftedDrop(){IsDroppedByCrafting=true;}
     public string ItemName=>string.IsNullOrWhiteSpace(displayName)?name:displayName;
     public string Prompt(bool firstPerson,bool inReach=true)
     {

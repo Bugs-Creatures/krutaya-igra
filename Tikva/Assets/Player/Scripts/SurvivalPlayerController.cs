@@ -83,6 +83,12 @@ public sealed class SurvivalPlayerController : MonoBehaviour
         jumpInProgress=false;wasInAirAnimation=false;
         if(animator)animator.SetBool("isJumping",false);
     }
+    public void TeleportFirstPerson(Transform destination)
+    {
+        if(!destination)return;
+        Teleport(destination.position);transform.rotation=Quaternion.Euler(0,destination.eulerAngles.y,0);pitch=0;
+        SetFirstPerson(true);if(cameraRig)cameraRig.UpdateView(0,pitch);
+    }
     void Awake()
     {
         controller=GetComponent<CharacterController>();walkingHash=Animator.StringToHash(walkingParameter);

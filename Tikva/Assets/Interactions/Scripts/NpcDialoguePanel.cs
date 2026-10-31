@@ -26,7 +26,7 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     {
         if(root)return;interaction=UnityEngine.Object.FindAnyObjectByType<PlayerInteraction>();
         root=Rect(gameObject.name+" dialogue",interaction.prompt.transform,new Vector2(950,180),new Vector2(0,120));root.anchorMin=root.anchorMax=new Vector2(.5f,0);
-        background=Rect("Speech background",root,new Vector2(900,44),new Vector2(0,45));background.gameObject.AddComponent<UnityEngine.UI.Image>().color=new Color(.025f,.025f,.025f,.92f);
+        background=Rect("Speech background",root,new Vector2(900,44),new Vector2(0,45));background.gameObject.AddComponent<UnityEngine.UI.Image>().color=new Color(.025f,.025f,.025f,1);
         label=Text(background,new Vector2(880,40),Vector2.zero);
         for(int n=0;n<2;n++)answers[n]=Text(root,new Vector2(900,38),new Vector2(0,-5-42*n));
         root.gameObject.SetActive(false);
@@ -98,3 +98,4 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     }
     void OnDisable(){if(IsOpen)End();}
 }
+

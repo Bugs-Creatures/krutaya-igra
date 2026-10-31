@@ -46,6 +46,7 @@ public sealed class ZaikaDialogue : MonoBehaviour, ITalkTarget
         }
         hookReward.transform.SetParent(null,true);hookReward.transform.position=point;hookReward.gameObject.SetActive(true);
         hookReward.Attach(transform);hookReward.Drop(point,GetComponentsInChildren<Collider>());
+        hookReward.RecordNpcDrop();
     }
     void OnDisable(){if(dialogue)dialogue.End();}
 }
