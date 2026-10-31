@@ -29,6 +29,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: lamp_tube
     second: {fileID: 2100000, guid: 5abfb2bc4bf894746a2e0d4b28cbc483, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: vodka
+    second: {fileID: 2100000, guid: 64505bfc4d2f4a54394a3684c0e5617e, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0

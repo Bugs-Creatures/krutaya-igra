@@ -25,12 +25,12 @@ public static class InstallShopProps
     const float West = -20.875f, East = -7.135f, Back = -21.875f, Front = -12.095f, FloorY = .01f, CeilY = 3.12f;
     const float DoorX0 = -18.4f, DoorX1 = -16.6f, DoorTop = 2.2f;
 
-    [MenuItem("Tools/Install shop props")]
-    public static void Apply()
+    // every model in Models onto the project's materials: the two atlases, glass, lamp tubes, the spirit in the vodka bottle
+    [MenuItem("Tools/Import shop models")]
+    public static void ImportModels()
     {
-        if(!Application.isBatchMode&&!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())return;
         var remap=new Dictionary<string,Material>{["ShopProps_Atlas"]=AtlasMaterial("ShopProps_Atlas"),["ShopProps2_Atlas"]=AtlasMaterial("ShopProps2_Atlas"),
-                                                 ["glass"]=GlassMaterial(),["glass_green"]=GlassMaterial(),["lamp_tube"]=TubeMaterial()};
+                                                 ["glass"]=GlassMaterial(),["glass_green"]=GlassMaterial(),["lamp_tube"]=TubeMaterial(),["vodka"]=SpiritMaterial()};
         foreach(var path in AssetDatabase.FindAssets("t:Model",new[]{Root+"Models"}).Select(AssetDatabase.GUIDToAssetPath))
         {
             var mi=(ModelImporter)AssetImporter.GetAtPath(path);
@@ -39,6 +39,13 @@ public static class InstallShopProps
             foreach(var kv in remap)mi.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material),kv.Key),kv.Value);
             mi.SaveAndReimport();
         }
+    }
+
+    [MenuItem("Tools/Install shop props")]
+    public static void Apply()
+    {
+        if(!Application.isBatchMode&&!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())return;
+        ImportModels();
         var scene=EditorSceneManager.OpenScene("Assets/Scenes/GameScene.unity");
         var shop=Object.FindObjectsByType<Transform>(FindObjectsInactive.Include).First(t=>t.name=="Checkout").parent;
         foreach(var n in new[]{"Shop props","Shop interior"}){var old=GameObject.Find(n);if(old)Object.DestroyImmediate(old);}
@@ -237,6 +244,25 @@ public static class InstallShopProps
         m.SetFloat("_SrcBlend",(float)BlendMode.SrcAlpha);m.SetFloat("_DstBlend",(float)BlendMode.OneMinusSrcAlpha);
         m.SetFloat("_SrcBlendAlpha",(float)BlendMode.One);m.SetFloat("_DstBlendAlpha",(float)BlendMode.OneMinusSrcAlpha);
         m.SetOverrideTag("RenderType","Transparent");m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");m.renderQueue=(int)RenderQueue.Transparent;
+        NoReflections(m,keepHighlights:true);
+        EditorUtility.SetDirty(m);return m;
+    }
+    // no mirror of the surroundings (and no sampling of the reflection cubemap); highlights from the lamps optional
+    static void NoReflections(Material m,bool keepHighlights)
+    {
+        m.SetFloat("_EnvironmentReflections",0);m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+        m.SetFloat("_SpecularHighlights",keepHighlights?1:0);
+        if(keepHighlights)m.DisableKeyword("_SPECULARHIGHLIGHTS_OFF");else m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+    }
+    static Material SpiritMaterial()                                    // the vodka inside the bottle: clear, faintly there
+    {
+        var m=Mat("ShopProps_Spirit");
+        m.SetColor("_BaseColor",new Color(.95f,.97f,.98f,.08f));m.SetFloat("_Metallic",0);m.SetFloat("_Smoothness",.96f);
+        m.SetFloat("_Surface",1);m.SetFloat("_Blend",0);m.SetFloat("_ZWrite",0);m.SetFloat("_AlphaClip",0);
+        m.SetFloat("_SrcBlend",(float)BlendMode.SrcAlpha);m.SetFloat("_DstBlend",(float)BlendMode.OneMinusSrcAlpha);
+        m.SetFloat("_SrcBlendAlpha",(float)BlendMode.One);m.SetFloat("_DstBlendAlpha",(float)BlendMode.OneMinusSrcAlpha);
+        m.SetOverrideTag("RenderType","Transparent");m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");m.renderQueue=(int)RenderQueue.Transparent-1;
+        NoReflections(m,keepHighlights:false);
         EditorUtility.SetDirty(m);return m;
     }
     static Material TubeMaterial()                                      // lit fluorescent tubes and the counters' light strips
