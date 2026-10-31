@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using TMPro;
 
 [DefaultExecutionOrder(900)]
-public sealed class ShopDialogue : MonoBehaviour
+public sealed class ShopDialogue : MonoBehaviour, ITalkTarget
 {
     public InteractionObject merchandise;
     public Transform salesman;

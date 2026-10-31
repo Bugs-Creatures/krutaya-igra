@@ -66,7 +66,7 @@ public sealed class PlayerInteraction : MonoBehaviour
     public bool TryInteract(InteractionObject item)
     {
         if(!item||!item.Allowed(player.EffectiveFirstPerson)||!InReach(item))return false;
-        if(item.kind==InteractionKind.Talk){item.GetComponent<ShopDialogue>().Talk();return true;}
+        if(item.kind==InteractionKind.Talk){var talk=item.GetComponent<ITalkTarget>();if(talk!=null)talk.Talk();return true;}
         if(item.kind==InteractionKind.Door){item.ToggleDoor();return true;}
         var firstPerson=player.EffectiveFirstPerson;
         var anchor=AnchorForMode(firstPerson);if(!anchor)return false;
@@ -98,6 +98,11 @@ public sealed class PlayerInteraction : MonoBehaviour
             if(free){point+=offset;break;}
         }
         heldItem.Drop(point,playerColliders);heldItem=null;player.currentHeldItem="";
+    }
+    // Hands the held item over to someone else (an NPC takes it): the item stays held, now by them.
+    public InteractionObject TakeHeld()
+    {
+        ResetHeldMotion();var item=heldItem;heldItem=null;player.currentHeldItem="";gripConfigured=false;return item;
     }
     public void EnforceHeldRules()
     {
