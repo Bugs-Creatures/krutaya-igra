@@ -71,16 +71,24 @@ public static class InstallShopProps
         PutAt("Shop_Scales",-8.23f,top,-14.2f,180);
         PutAt("Shop_Stool",-10.0f,0,-12.7f,0);
         Row("Shop_WallShelf",90,1,-7.14f,-13.66f,false,maxX:true);              // behind the counter, back on the east wall
-        Row("Shop_WallShelf",180,8,-19.92f,-21.87f,true);                     // the whole back wall
+        Row("Shop_WallShelf",180,7,-19.35f,-21.87f,true);                     // back wall, clear of the fridges and the east wall run
         Row("Shop_WallShelf",90,3,-7.14f,-21.25f,false,maxX:true);            // east wall up to the queue at the counter
-        Row("Shop_Fridge",-90,6,-20.87f,-21.87f,false);                       // west wall, doors to the shop
-        Row("Shop_WallShelf",-90,2,-20.87f,-16.5f,false);                     // west wall on to the door
+        // in the corners one run stops short of the other: nothing stands in front of a shelf or a fridge door
+        Row("Shop_Fridge",-90,6,-20.87f,-21.25f,false);                       // west wall, doors to the shop
+        Row("Shop_WallShelf",-90,2,-20.87f,-15.9f,false);                     // west wall on to the door
         // four island runs across the shop, the one by the counter shorter to leave the queue free
         foreach(var (x,n) in new[]{(-18.0f,3),(-15.4f,3),(-12.8f,3),(-10.2f,2)})Row("Shop_Gondola",90,n,x-.6125f,-20.07f,false);
         Row("Shop_ProduceBin",0,3,-16.45f,-12.1f,true,maxZ:true);            // under the display windows, low side to the shop
         Row("Shop_PackingTable",0,1,-19.9f,-12.1f,true,maxZ:true);          // in the corner by the door
-        PutAt("Shop_Basket",-19.6f,0,-13.0f,10);
-        PutAt("Shop_Basket",-19.55f,0,-13.5f,-8);
+        var table=parent.Cast<Transform>().Last(t=>t.name=="Shop_PackingTable").GetComponent<Renderer>().bounds;
+        Physics.SyncTransforms();
+        foreach(var dx in new[]{-.25f,.25f})                                   // two baskets on the table by the door
+        {
+            var basket=Put("Shop_Basket",90);var at=new Vector3(table.center.x+dx,table.max.y+.5f,table.center.z);
+            Physics.Raycast(at,Vector3.down,out var on,1f,~0,QueryTriggerInteraction.Ignore);
+            basket.transform.position=new Vector3(at.x,0,at.z);
+            basket.transform.position+=Vector3.up*(on.point.y+.002f-basket.GetComponent<Renderer>().bounds.min.y);
+        }
         // placeholders off
         var off=new List<string>();
         foreach(var t in shop.GetComponentsInChildren<Transform>(true))
