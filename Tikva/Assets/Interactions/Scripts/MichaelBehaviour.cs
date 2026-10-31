@@ -51,7 +51,7 @@ public sealed class MichaelBehaviour : MonoBehaviour, ITalkTarget
     void Learn(int choice)
     {
         learned=true;walkForward=choice==0;walkFaster=choice==1;
-        dialogue.Say("Майкл: Спасибо! Я всё время прихожу не туда.",hold:1,complete:()=>dialogue.Say("Майкл: Держи, может тебе пригодится.",hold:1,complete:()=>{GiveMap();Finish();}));
+        dialogue.Say("Майкл: Спасибо! Я то я всё время прихожу не туда.",hold:1,complete:()=>dialogue.Say("Майкл: Держи, может тебе пригодится.",hold:1,complete:()=>{GiveMap();Finish();}));
     }
     void GiveMap()
     {
