@@ -6,7 +6,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 // Groceries on the shelves of the shop props: dry goods (packs, tins, cheese) on the island and
-// wall shelving, milk, sour cream and butter in the fridges. Every shelf holds a single product,
+// wall shelving, milk, sour cream and butter in the fridges, cheese, butter and dairy on the decks of the
+// serve-over counters. Every shelf holds a single product,
 // changing from shelf to shelf, in neat blocks of a few facings and a few rows deep; each item is
 // put down where a ray from above meets the shelf, label to the aisle, half as large again as life,
 // less where the shelf above leaves no room. Decoration only: no colliders.
@@ -15,6 +16,7 @@ public static class InstallShopProducts
     const string Root = "Assets/ShopProps/";
     static readonly string[] Dry = { "Product_PackA", "Product_PackB", "Product_PackSmall", "Product_CanRed", "Product_CanGreen", "Product_Cheese" };
     static readonly string[] Cold = { "Product_MilkBottle", "Product_Cup", "Product_Butter" };
+    static readonly string[] Deli = { "Product_Cheese", "Product_Butter", "Product_Cup", "Product_Cheese", "Product_MilkBottle" };
     static readonly Dictionary<string, (Color colour, float metallic, float smoothness)> Flat = new()
     {
         ["Product_CanMetal"] = (new Color(.62f, .62f, .60f), .9f, .65f), ["Product_LabelRed"] = (new Color(.55f, .12f, .08f), 0, .4f),
@@ -46,19 +48,20 @@ public static class InstallShopProducts
         int placed=0,missed=0,tris=0,shelves=0;
 
         var rnd=new System.Random(1994);
-        // one shelf, one product: blocks of 2-4 facings, each 1-4 deep from the price rail back towards
-        // the panel, a hand's width between blocks; along [a,b] of axis `along`, the front `front` metres out
-        // along `outward`. Only the front row casts shadows.
-        void Shelf(Transform prop,Vector3 origin,Vector3 along,Vector3 outward,float level,float front,float a,float b,string name)
+        // one shelf, one product: blocks of 2-4 facings, each 1 to maxDeep deep from the price rail back towards
+        // the panel (or `open` metres where there is none), gaps between blocks; along [a,b] of axis `along`, the
+        // front `front` metres out along `outward`. A share `skip` of the shelves stays empty. Only the front row casts shadows.
+        void Shelf(Transform prop,Vector3 origin,Vector3 along,Vector3 outward,float level,float front,float a,float b,string name,int maxDeep,float open=.3f,float skip=0)
         {
+            if(rnd.NextDouble()<skip){shelves++;return;}
             var s=size[name];float k=Big,w0=Mathf.Abs(s.x),d0=Mathf.Abs(s.y),h0=Mathf.Abs(s.z);
             // the room on this shelf, at its middle: up to the shelf above (smaller items if it is low) and back to the panel
             var mid=origin+along*((a+b)/2)+outward*(front-.02f)+Vector3.up*(level+.15f);
             if(!Physics.Raycast(mid,Vector3.down,out var bed,.35f,~0,QueryTriggerInteraction.Ignore)||bed.transform!=prop){missed++;return;}
             if(Physics.Raycast(bed.point+Vector3.up*.005f,Vector3.up,out var roof,h0*Big,~0,QueryTriggerInteraction.Ignore))k=Mathf.Min(Big,roof.distance*.92f/h0);
             float w=w0*k+.01f,d=d0*k+.008f;
-            float room=Physics.Raycast(bed.point+Vector3.up*(h0*k*.5f),-outward,out var panel,1f,~0,QueryTriggerInteraction.Ignore)?panel.distance:d;
-            int deepMax=Mathf.Clamp(Mathf.FloorToInt((room+.01f)/d),1,4);
+            float room=Physics.Raycast(bed.point+Vector3.up*(h0*k*.5f),-outward,out var panel,1f,~0,QueryTriggerInteraction.Ignore)?panel.distance:open;
+            int deepMax=Mathf.Clamp(Mathf.FloorToInt((room+.01f)/d),1,maxDeep);
             for(float pos=a;;)
             {
                 int across=rnd.Next(2,5),deep=rnd.Next(1,deepMax+1);
@@ -76,7 +79,7 @@ public static class InstallShopProducts
                     GameObjectUtility.SetStaticEditorFlags(go,StaticEditorFlags.BatchingStatic);
                     placed++;tris+=go.GetComponent<MeshFilter>().sharedMesh.triangles.Length/3;
                 }
-                pos+=across*w+.04f+(float)rnd.NextDouble()*.06f;
+                pos+=across*w+.08f+(float)rnd.NextDouble()*.25f;
             }
             shelves++;
         }
@@ -92,13 +95,16 @@ public static class InstallShopProducts
             {
                 case "Shop_Gondola":       // both sides, three shelves, behind the price rail
                     int side=0;
-                    foreach(var dir in new[]{front,-front}){int l=0;foreach(var z in new[]{.62f,1.0f,1.36f})Shelf(prop,o,along,dir,z*m,.455f*m,-.6f*m,.6f*m,Pick(Dry,l++ +3*side));side++;}
+                    foreach(var dir in new[]{front,-front}){int l=0;foreach(var z in new[]{.62f,1.0f,1.36f})Shelf(prop,o,along,dir,z*m,.455f*m,-.6f*m,.6f*m,Pick(Dry,l++ +3*side),2);side++;}
                     break;
                 case "Shop_WallShelf":     // four shelves, behind the price strip
-                    {int l=0;foreach(var z in new[]{.124f,.604f,1.084f,1.564f})Shelf(prop,o,along,front,z*m,.195f*m,-.54f*m,.54f*m,Pick(Dry,l++));}
+                    {int l=0;foreach(var z in new[]{.124f,.604f,1.084f,1.564f})Shelf(prop,o,along,front,z*m,.195f*m,-.54f*m,.54f*m,Pick(Dry,l++),2,skip:.2f);}
                     break;
                 case "Shop_Fridge":        // three wire shelves and the floor, behind the glass
-                    {int l=0;foreach(var z in new[]{.15f,.562f,.962f,1.362f})Shelf(prop,o,along,front,z*m,.22f*m,-.24f*m,.24f*m,Pick(Cold,l++));}
+                    {int l=0;foreach(var z in new[]{.15f,.562f,.962f,1.362f})Shelf(prop,o,along,front,z*m,.22f*m,-.24f*m,.24f*m,Pick(Cold,l++),2);}
+                    break;
+                case "Shop_Vitrine":       // the display deck behind the curved glass, up to the seller's work top
+                    Shelf(prop,o,along,front,.775f*m,.42f*m,-.68f*m,.68f*m,Pick(Deli,0),3,.5f);
                     break;
                 default:continue;
             }

@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: ShopProps2_Atlas
+    second: {fileID: 2100000, guid: 829dd20122a568249a368d9535ad048e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: ShopProps_Atlas
     second: {fileID: 2100000, guid: 78a81c3f1de4c6945b467e640f000b6d, type: 2}
   - first:
@@ -19,6 +24,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: glass_green
     second: {fileID: 2100000, guid: 37fe8aea826ad22419e13c707b18a1d2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: lamp_tube
+    second: {fileID: 2100000, guid: 5abfb2bc4bf894746a2e0d4b28cbc483, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
