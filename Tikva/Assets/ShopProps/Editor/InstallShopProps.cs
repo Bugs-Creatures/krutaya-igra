@@ -147,7 +147,7 @@ public static class InstallShopProps
     }
 
     // tiled floor; walls and ceiling lined 1 cm inside the blockout (its outside stays as it is);
-    // nine two-tube fittings on the ceiling with a point light each, in place of the blockout's one light
+    // six two-tube fittings on the ceiling with their lights, in place of the blockout's one light
     static void Interior(Transform shop,Transform floor,Func<string,float,Transform,GameObject> put)
     {
         var root=new GameObject("Shop interior").transform;
@@ -171,25 +171,36 @@ public static class InstallShopProps
         Wall("Shopfront lining over the door",new Vector3(DoorX0,0,Front-.005f),new Vector3(DoorX1,0,Front-.005f),Vector3.back,DoorTop);
         Panel(root,"Ceiling lining",new Vector3(West,CeilY,Back),Vector3.right*(East-West),Vector3.forward*(Front-Back),Vector3.down,ceiling,
               p=>new Vector2(p.x/1.2f,p.z/1.2f));
-        // fittings in three rows across the shop, the tray against the ceiling
         var old=shop.GetComponentsInChildren<Light>(true).FirstOrDefault(l=>l.name=="Cold fluorescent");
         if(old)old.gameObject.SetActive(false);
-        foreach(var (x,z) in Fittings)
-        {
-            var lamp=put("Shop_Lamp",0,root);var b=lamp.GetComponent<Renderer>().bounds;
-            lamp.transform.position+=new Vector3(x,CeilY,z)-new Vector3(b.center.x,b.max.y,b.center.z);
-        }
+        Lamps(root);
         Lights(root);
     }
-    static readonly (float x,float z)[] Fittings=new[]{-20.2f,-16.8f,-13.6f}.SelectMany(z=>new[]{-18.0f,-14.0f,-10.0f}.Select(x=>(x,z))).ToArray();
+    // six fittings in two rows across the shop
+    static readonly (float x,float z)[] Fittings=new[]{-19.4f,-14.6f}.SelectMany(z=>new[]{-18.0f,-14.0f,-10.0f}.Select(x=>(x,z))).ToArray();
 
     [MenuItem("Tools/Relight shop")]
     public static void Relight()
     {
         if(!Application.isBatchMode&&!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())return;
         var scene=EditorSceneManager.OpenScene("Assets/Scenes/GameScene.unity");
-        Lights(GameObject.Find("Shop interior").transform);
+        var root=GameObject.Find("Shop interior").transform;
+        Lamps(root);Lights(root);
         EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
+    }
+
+    // the fittings, the tray against the ceiling (any there were go first)
+    static void Lamps(Transform root)
+    {
+        foreach(var go in root.Cast<Transform>().Where(t=>t.name=="Shop_Lamp").Select(t=>t.gameObject).ToArray())Object.DestroyImmediate(go);
+        var model=AssetDatabase.LoadAssetAtPath<GameObject>(Root+"Models/Shop_Lamp.fbx");
+        foreach(var (x,z) in Fittings)
+        {
+            var lamp=(GameObject)PrefabUtility.InstantiatePrefab(model,root.gameObject.scene);
+            lamp.transform.SetParent(root,true);
+            var b=lamp.GetComponent<Renderer>().bounds;
+            lamp.transform.position+=new Vector3(x,CeilY,z)-new Vector3(b.center.x,b.max.y,b.center.z);
+        }
     }
 
     // the light of the fittings: a wide spot straight down under each, with soft shadows, so the shelves and
@@ -206,14 +217,14 @@ public static class InstallShopProps
         {
             var spot=new GameObject("Light").AddComponent<Light>();
             spot.transform.SetParent(root,false);spot.transform.SetPositionAndRotation(new Vector3(x,CeilY-.1f,z),Quaternion.LookRotation(Vector3.down,Vector3.forward));
-            spot.type=LightType.Spot;spot.spotAngle=150;spot.innerSpotAngle=95;spot.range=7;spot.intensity=5;spot.color=white;
+            spot.type=LightType.Spot;spot.spotAngle=150;spot.innerSpotAngle=95;spot.range=8;spot.intensity=6.5f;spot.color=white;
             spot.shadows=LightShadows.Soft;spot.shadowStrength=.75f;
             var shadow=new SerializedObject(spot.GetUniversalAdditionalLightData());   // low shadow resolution and cheap soft shadows (the setters refuse outside play mode)
             shadow.FindProperty("m_AdditionalLightsShadowResolutionTier").intValue=UniversalAdditionalLightData.AdditionalLightsShadowResolutionTierLow;
             shadow.FindProperty("m_SoftShadowQuality").intValue=(int)SoftShadowQuality.Low;shadow.ApplyModifiedPropertiesWithoutUndo();
             var fill=new GameObject("Light fill").AddComponent<Light>();
             fill.transform.SetParent(root,false);fill.transform.position=new Vector3(x,CeilY-.6f,z);
-            fill.type=LightType.Point;fill.range=4.5f;fill.intensity=.7f;fill.color=white;fill.shadows=LightShadows.None;
+            fill.type=LightType.Point;fill.range=5.5f;fill.intensity=.9f;fill.color=white;fill.shadows=LightShadows.None;
         }
         // the tubes glow: bloom in the shop only (a local volume the size of it, out of the cursor's way on
         // Ignore Raycast), and the game camera draws post effects (outside there is no volume with any set)

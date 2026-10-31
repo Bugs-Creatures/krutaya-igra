@@ -19,6 +19,7 @@ public static class InstallQuestItems
         ("GrapplingHook", "Item_GrapplingHook", new Vector3(90, 0, 0)),   // on its side
         ("Лопата", "Item_Shovel", new Vector3(90, 0, 0)),                // lying, the blade face up
         ("Ключ", "Item_Key", Vector3.zero), ("Плоскогубцы", "Item_Cutters", Vector3.zero),
+        ("Axe", "Item_Axe", new Vector3(90, 0, 0)),                     // the boss's reward, lying
     };
     static readonly System.Collections.Generic.Dictionary<string,Vector3> Ground = new()   // footprint centre and bottom, where moved
     {
@@ -28,13 +29,15 @@ public static class InstallQuestItems
     };
 
     [MenuItem("Tools/Install quest item models")]
-    public static void Apply()
+    public static void Apply()=>ApplyTo();
+    // only the items named (all of them when none are)
+    public static void ApplyTo(params string[] only)
     {
         if(!Application.isBatchMode&&!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())return;
         InstallShopProps.ImportModels();
         var scene=EditorSceneManager.OpenScene("Assets/Scenes/GameScene.unity");
         var all=Object.FindObjectsByType<InteractionObject>(FindObjectsInactive.Include,FindObjectsSortMode.None);
-        foreach(var (itemName,model,turn) in Items)
+        foreach(var (itemName,model,turn) in Items.Where(i=>only.Length==0||only.Contains(i.item)))
         {
             var item=all.FirstOrDefault(i=>i.name==itemName);
             if(!item){Debug.LogWarning("QUESTITEM no "+itemName+" in the scene");continue;}
@@ -71,7 +74,7 @@ public static class InstallQuestItems
             Physics.SyncTransforms();
             Debug.Log($"QUESTITEM {itemName} <- {model}: stood {was.size} at {was.center}, now {b.size} bottom {b.min.y:0.000}, aim {(item.gameObject.activeInHierarchy?Aim(item):"(off)")}");
         }
-        CraftedPrefab();
+        if(only.Length==0)CraftedPrefab();
         EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
     }
 

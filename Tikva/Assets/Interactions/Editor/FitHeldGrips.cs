@@ -22,6 +22,7 @@ public static class FitHeldGrips
         ("crowbar", End.Wide, new(-.25f,.3f,1), new(1,0,.2f), .2f, new(-1,.35f,0), new(0,0,1), .2f),
         ("vodka", End.Narrow, Vector3.zero, Vector3.zero, 0, new(0,-1,0), new(0,0,1), 0),   // first person: as it was, upright, the label to the eye
         ("rope", End.Wide, new(1,0,0), new(.2f,.3f,-1), 0, new(0,1,0), new(0,0,1), 0),
+        ("Axe", End.Wide, new(-.25f,.4f,1), new(1,0,.2f), .2f, new(-1,.35f,0), new(0,0,1), .2f),
         ("GrapplingHook", End.Wide, new(-.1f,.7f,1), new(1,0,0), .05f, new(-1,-.4f,0), new(0,0,1), .08f),
     };
     const string Crafted="Assets/Interactions/RopeGrapplingHook.prefab";
