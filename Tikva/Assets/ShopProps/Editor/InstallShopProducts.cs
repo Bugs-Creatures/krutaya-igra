@@ -5,25 +5,18 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Groceries on the shelves of the shop props: dry goods (packs, tins, cheese) on the island and
-// wall shelving, milk, sour cream and butter in the fridges, cheese, butter and dairy on the decks of the
-// serve-over counters. Every shelf holds a single product,
+// Groceries on the shelves of the shop props: dry goods (sugar, salt, soda, condensed milk, stew, soap) on
+// the island and wall shelving, milk, Snezhok cups and butter in the fridges, butter and dairy on the decks
+// of the serve-over counters. All of them share the team's texture set (Product_Props). Every shelf holds a single product,
 // changing from shelf to shelf, in neat blocks of a few facings and a few rows deep; each item is
 // put down where a ray from above meets the shelf, label to the aisle, half as large again as life,
 // less where the shelf above leaves no room. Decoration only: no colliders.
 public static class InstallShopProducts
 {
     const string Root = "Assets/ShopProps/";
-    static readonly string[] Dry = { "Product_PackA", "Product_PackB", "Product_PackSmall", "Product_CanRed", "Product_CanGreen", "Product_Cheese" };
+    static readonly string[] Dry = { "Product_Sugar", "Product_Salt", "Product_Soda", "Product_CondensedMilk", "Product_Stew", "Product_Soap" };
     static readonly string[] Cold = { "Product_MilkBottle", "Product_Cup", "Product_Butter" };
-    static readonly string[] Deli = { "Product_Cheese", "Product_Butter", "Product_Cup", "Product_Cheese", "Product_MilkBottle" };
-    static readonly Dictionary<string, (Color colour, float metallic, float smoothness)> Flat = new()
-    {
-        ["Product_CanMetal"] = (new Color(.62f, .62f, .60f), .9f, .65f), ["Product_LabelRed"] = (new Color(.55f, .12f, .08f), 0, .4f),
-        ["Product_LabelGreen"] = (new Color(.20f, .34f, .16f), 0, .4f), ["Product_Foil"] = (new Color(.75f, .74f, .70f), .8f, .7f),
-        ["Product_Milk"] = (new Color(.88f, .88f, .85f), 0, .75f), ["Product_PlasticWhite"] = (new Color(.86f, .85f, .80f), 0, .55f),
-        ["Product_PaperYellow"] = (new Color(.85f, .66f, .20f), 0, .3f),
-    };
+    static readonly string[] Deli = { "Product_Butter", "Product_Cup", "Product_Butter", "Product_MilkBottle", "Product_Cup" };
 
     [MenuItem("Tools/Install shop products")]
     public static void Apply()
@@ -129,17 +122,12 @@ public static class InstallShopProducts
             ti.textureType=normal?TextureImporterType.NormalMap:TextureImporterType.Default;ti.sRGBTexture=srgb;ti.maxTextureSize=2048;ti.anisoLevel=8;ti.SaveAndReimport();
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
-        var pack=Mat("Product_Pack");
-        pack.SetTexture("_BaseMap",Tex("Product_Pack_BaseColor",false,true));pack.SetColor("_BaseColor",Color.white);
-        pack.SetTexture("_BumpMap",Tex("Product_Pack_Normal",true,false));pack.EnableKeyword("_NORMALMAP");
-        pack.SetTexture("_MetallicGlossMap",Tex("Product_Pack_MetallicSmoothness",false,false));pack.EnableKeyword("_METALLICSPECGLOSSMAP");
-        pack.SetFloat("_Metallic",1);pack.SetFloat("_Smoothness",1);
-        EditorUtility.SetDirty(pack);
-        foreach(var kv in Flat)
-        {
-            var m=Mat(kv.Key);m.SetColor("_BaseColor",kv.Value.colour);m.SetFloat("_Metallic",kv.Value.metallic);m.SetFloat("_Smoothness",kv.Value.smoothness);
-            EditorUtility.SetDirty(m);
-        }
+        var props=Mat("Product_Props");
+        props.SetTexture("_BaseMap",Tex("Product_Props_BaseColor",false,true));props.SetColor("_BaseColor",Color.white);
+        props.SetTexture("_BumpMap",Tex("Product_Props_Normal",true,false));props.EnableKeyword("_NORMALMAP");
+        props.SetTexture("_MetallicGlossMap",Tex("Product_Props_MetallicSmoothness",false,false));props.EnableKeyword("_METALLICSPECGLOSSMAP");
+        props.SetFloat("_Metallic",1);props.SetFloat("_Smoothness",1);
+        EditorUtility.SetDirty(props);
         foreach(var path in AssetDatabase.FindAssets("t:Model",new[]{Root+"Products"}).Select(AssetDatabase.GUIDToAssetPath))
         {
             var mi=(ModelImporter)AssetImporter.GetAtPath(path);

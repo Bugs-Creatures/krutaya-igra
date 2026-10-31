@@ -44,6 +44,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Product_PlasticWhite
     second: {fileID: 2100000, guid: ed3a39c7c9a7dc3478d14968a5860555, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Product_Props
+    second: {fileID: 2100000, guid: da2e5c117a2c30e4e83e0b7baa71cf4c, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0

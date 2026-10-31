@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f854526f535c9d343b59bc8596b0038e
+guid: 56cb7ec70876c8548bda370a00a5efc7
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
@@ -7,43 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Product_CanMetal
-    second: {fileID: 2100000, guid: 67a1af276d81abe4aa53f7a5d4b3deaf, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Product_Foil
-    second: {fileID: 2100000, guid: 78032711bce44934798381b288f7b729, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Product_LabelGreen
-    second: {fileID: 2100000, guid: 293edfaee323b264a8d45b7e81ff0de0, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Product_LabelRed
-    second: {fileID: 2100000, guid: 6e6dc04a2eff3d74cbb02f8a0594456b, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Product_Milk
-    second: {fileID: 2100000, guid: 73946d379d717d346a068d03c7f00e16, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Product_Pack
-    second: {fileID: 2100000, guid: 066c8a2c1b7ef1446b00ea90f686a1e9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Product_PaperYellow
-    second: {fileID: 2100000, guid: 01b8ea0db23276c42904a80f04ff5e09, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Product_PlasticWhite
-    second: {fileID: 2100000, guid: ed3a39c7c9a7dc3478d14968a5860555, type: 2}
+      name: Product_Props
+    second: {fileID: 2100000, guid: da2e5c117a2c30e4e83e0b7baa71cf4c, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
