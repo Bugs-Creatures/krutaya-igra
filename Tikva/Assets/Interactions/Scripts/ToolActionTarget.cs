@@ -33,6 +33,11 @@ public sealed class ToolActionTarget : MonoBehaviour
             return true;
         }
         if(!destination){LastFailure="Точка входа не назначена.";return false;}
-        IsUnlocked=true;interaction.player.TeleportFirstPerson(destination);return true;
+        bool firstUnlock=!IsUnlocked;IsUnlocked=true;
+        if(firstUnlock&&interaction.heldItem==requiredTool)
+        {
+            var key=interaction.TakeHeld();key.gameObject.SetActive(false);Destroy(key.gameObject);
+        }
+        interaction.player.TeleportFirstPerson(destination);return true;
     }
 }
