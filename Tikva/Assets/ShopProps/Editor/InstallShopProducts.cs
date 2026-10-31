@@ -44,7 +44,8 @@ public static class InstallShopProducts
         var rnd=new System.Random(1994);
         // one shelf, one product: blocks of 2-4 facings, each 1 to maxDeep deep from the price rail back towards
         // the panel (or `open` metres where there is none), gaps between blocks; along [a,b] of axis `along`, the
-        // front `front` metres out along `outward`. A share `skip` of the shelves stays empty. Only the front row casts shadows.
+        // front `front` metres out along `outward`. A share `skip` of the shelves stays empty. No shadows: nine shadowed
+        // lamps over some 850 goods cost too much, the shelves under them cast theirs.
         void Shelf(Transform prop,Vector3 origin,Vector3 along,Vector3 outward,float level,float front,float a,float b,string name,int maxDeep,float open=.3f,float skip=0)
         {
             if(rnd.NextDouble()<skip){shelves++;return;}
@@ -69,7 +70,7 @@ public static class InstallShopProducts
                     var upright=go.transform.rotation;
                     go.transform.SetParent(root,false);go.transform.SetPositionAndRotation(hit.point,Quaternion.LookRotation(-outward,Vector3.up)*upright);
                     go.transform.localScale*=k;
-                    if(j>0)go.GetComponent<Renderer>().shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
+                    go.GetComponent<Renderer>().shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
                     GameObjectUtility.SetStaticEditorFlags(go,StaticEditorFlags.BatchingStatic);
                     placed++;tris+=go.GetComponent<MeshFilter>().sharedMesh.triangles.Length/3;
                 }

@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using Object = UnityEngine.Object;
 
 // The grocery of GameScene fitted out as a counter-service shop of the 90s: wall cabinets round the
@@ -197,7 +198,8 @@ public static class InstallShopProps
     // the shelves mirror the lit shop, not the sky outside
     static void Lights(Transform root)
     {
-        foreach(var go in root.GetComponentsInChildren<Light>(true).Select(l=>l.gameObject).Concat(root.GetComponentsInChildren<ReflectionProbe>(true).Select(p=>p.gameObject)).ToArray())
+        foreach(var go in root.GetComponentsInChildren<Light>(true).Select(l=>l.gameObject).Concat(root.GetComponentsInChildren<ReflectionProbe>(true).Select(p=>p.gameObject))
+                    .Concat(root.GetComponentsInChildren<Volume>(true).Select(v=>v.gameObject)).ToArray())
             Object.DestroyImmediate(go);
         var white=new Color(1f,.97f,.92f);
         foreach(var (x,z) in Fittings)
@@ -206,15 +208,37 @@ public static class InstallShopProps
             spot.transform.SetParent(root,false);spot.transform.SetPositionAndRotation(new Vector3(x,CeilY-.1f,z),Quaternion.LookRotation(Vector3.down,Vector3.forward));
             spot.type=LightType.Spot;spot.spotAngle=150;spot.innerSpotAngle=95;spot.range=7;spot.intensity=5;spot.color=white;
             spot.shadows=LightShadows.Soft;spot.shadowStrength=.75f;
+            var shadow=new SerializedObject(spot.GetUniversalAdditionalLightData());   // low shadow resolution and cheap soft shadows (the setters refuse outside play mode)
+            shadow.FindProperty("m_AdditionalLightsShadowResolutionTier").intValue=UniversalAdditionalLightData.AdditionalLightsShadowResolutionTierLow;
+            shadow.FindProperty("m_SoftShadowQuality").intValue=(int)SoftShadowQuality.Low;shadow.ApplyModifiedPropertiesWithoutUndo();
             var fill=new GameObject("Light fill").AddComponent<Light>();
-            fill.transform.SetParent(root,false);fill.transform.position=new Vector3(x,CeilY-.25f,z);
-            fill.type=LightType.Point;fill.range=5;fill.intensity=.8f;fill.color=white;fill.shadows=LightShadows.None;
+            fill.transform.SetParent(root,false);fill.transform.position=new Vector3(x,CeilY-.6f,z);
+            fill.type=LightType.Point;fill.range=4.5f;fill.intensity=.7f;fill.color=white;fill.shadows=LightShadows.None;
         }
+        // the tubes glow: bloom in the shop only (a local volume the size of it, out of the cursor's way on
+        // Ignore Raycast), and the game camera draws post effects (outside there is no volume with any set)
+        TubeMaterial();
+        var glow=new GameObject("Shop glow"){layer=2};
+        glow.transform.SetParent(root,false);glow.transform.position=new Vector3((West+East)/2,(FloorY+CeilY)/2,(Back+Front)/2);
+        var zone=glow.AddComponent<BoxCollider>();zone.isTrigger=true;zone.size=new Vector3(East-West,CeilY-FloorY,Front-Back);
+        var volume=glow.AddComponent<Volume>();volume.isGlobal=false;volume.blendDistance=.5f;volume.priority=1;volume.sharedProfile=GlowProfile();
+        var rig=Object.FindAnyObjectByType<SurvivalCameraRig>();
+        if(rig&&rig.output){var data=rig.output.GetUniversalAdditionalCameraData();data.renderPostProcessing=true;data.volumeLayerMask|=1<<2;EditorUtility.SetDirty(data);}
         var probe=new GameObject("Shop reflections").AddComponent<ReflectionProbe>();
         probe.transform.SetParent(root,false);probe.transform.position=new Vector3((West+East)/2,(FloorY+CeilY)/2,(Back+Front)/2);
         probe.size=new Vector3(East-West,CeilY-FloorY,Front-Back);probe.boxProjection=true;probe.resolution=128;probe.importance=2;
         probe.mode=UnityEngine.Rendering.ReflectionProbeMode.Realtime;probe.refreshMode=UnityEngine.Rendering.ReflectionProbeRefreshMode.OnAwake;
         probe.timeSlicingMode=UnityEngine.Rendering.ReflectionProbeTimeSlicingMode.AllFacesAtOnce;
+    }
+    static VolumeProfile GlowProfile()
+    {
+        const string path=Root+"Materials/ShopGlow.asset";
+        var profile=AssetDatabase.LoadAssetAtPath<VolumeProfile>(path);
+        if(!profile){profile=ScriptableObject.CreateInstance<VolumeProfile>();AssetDatabase.CreateAsset(profile,path);}
+        if(!profile.TryGet<Bloom>(out var bloom)){bloom=profile.Add<Bloom>(true);AssetDatabase.AddObjectToAsset(bloom,profile);}
+        bloom.threshold.value=1.1f;bloom.intensity.value=.9f;bloom.scatter.value=.65f;
+        EditorUtility.SetDirty(bloom);EditorUtility.SetDirty(profile);AssetDatabase.SaveAssets();
+        return profile;
     }
 
     // one quad facing `facing`, its UVs from the world position by `uv`
@@ -303,7 +327,7 @@ public static class InstallShopProps
     {
         var m=Mat("ShopProps_LampTube");
         m.SetColor("_BaseColor",new Color(.95f,.97f,1f));m.SetFloat("_Metallic",0);m.SetFloat("_Smoothness",.6f);
-        m.SetColor("_EmissionColor",new Color(.9f,.95f,1f)*2.5f);m.EnableKeyword("_EMISSION");
+        m.SetColor("_EmissionColor",new Color(.9f,.95f,1f)*6f);m.EnableKeyword("_EMISSION");
         m.globalIlluminationFlags=MaterialGlobalIlluminationFlags.RealtimeEmissive;
         EditorUtility.SetDirty(m);return m;
     }
