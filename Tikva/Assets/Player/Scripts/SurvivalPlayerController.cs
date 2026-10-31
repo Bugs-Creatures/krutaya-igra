@@ -56,7 +56,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     public bool tankControlsOutdoors=true;
     [Header("Movement")]
     public float walkSpeed=2.9f;
-    public float runMultiplier=1.55f;
+    public float runMultiplier=1.8f;
     public float backwardSpeedMultiplier=.75f;
     public float tankTurnSpeed=170;
     public float turnSpeed=640;

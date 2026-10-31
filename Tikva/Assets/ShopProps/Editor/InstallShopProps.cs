@@ -170,17 +170,51 @@ public static class InstallShopProps
         Wall("Shopfront lining over the door",new Vector3(DoorX0,0,Front-.005f),new Vector3(DoorX1,0,Front-.005f),Vector3.back,DoorTop);
         Panel(root,"Ceiling lining",new Vector3(West,CeilY,Back),Vector3.right*(East-West),Vector3.forward*(Front-Back),Vector3.down,ceiling,
               p=>new Vector2(p.x/1.2f,p.z/1.2f));
-        // fittings in three rows across the shop, the tray against the ceiling, a cold point light under each
+        // fittings in three rows across the shop, the tray against the ceiling
         var old=shop.GetComponentsInChildren<Light>(true).FirstOrDefault(l=>l.name=="Cold fluorescent");
         if(old)old.gameObject.SetActive(false);
-        foreach(var z in new[]{-20.2f,-16.8f,-13.6f})foreach(var x in new[]{-18.0f,-14.0f,-10.0f})
+        foreach(var (x,z) in Fittings)
         {
             var lamp=put("Shop_Lamp",0,root);var b=lamp.GetComponent<Renderer>().bounds;
             lamp.transform.position+=new Vector3(x,CeilY,z)-new Vector3(b.center.x,b.max.y,b.center.z);
-            var light=new GameObject("Light").AddComponent<Light>();
-            light.transform.SetParent(root,false);light.transform.position=new Vector3(x,CeilY-.18f,z);
-            light.type=LightType.Point;light.range=6f;light.intensity=1.5f;light.color=new Color(.90f,.96f,1f);light.shadows=LightShadows.None;
         }
+        Lights(root);
+    }
+    static readonly (float x,float z)[] Fittings=new[]{-20.2f,-16.8f,-13.6f}.SelectMany(z=>new[]{-18.0f,-14.0f,-10.0f}.Select(x=>(x,z))).ToArray();
+
+    [MenuItem("Tools/Relight shop")]
+    public static void Relight()
+    {
+        if(!Application.isBatchMode&&!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())return;
+        var scene=EditorSceneManager.OpenScene("Assets/Scenes/GameScene.unity");
+        Lights(GameObject.Find("Shop interior").transform);
+        EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
+    }
+
+    // the light of the fittings: a wide spot straight down under each, with soft shadows, so the shelves and
+    // the goods stand on the floor; a dim point beside it for the ceiling and the tops of the walls the spots
+    // miss; and a reflection probe the size of the shop, taken when the scene starts, so the glossy floor and
+    // the shelves mirror the lit shop, not the sky outside
+    static void Lights(Transform root)
+    {
+        foreach(var go in root.GetComponentsInChildren<Light>(true).Select(l=>l.gameObject).Concat(root.GetComponentsInChildren<ReflectionProbe>(true).Select(p=>p.gameObject)).ToArray())
+            Object.DestroyImmediate(go);
+        var white=new Color(1f,.97f,.92f);
+        foreach(var (x,z) in Fittings)
+        {
+            var spot=new GameObject("Light").AddComponent<Light>();
+            spot.transform.SetParent(root,false);spot.transform.SetPositionAndRotation(new Vector3(x,CeilY-.1f,z),Quaternion.LookRotation(Vector3.down,Vector3.forward));
+            spot.type=LightType.Spot;spot.spotAngle=150;spot.innerSpotAngle=95;spot.range=7;spot.intensity=5;spot.color=white;
+            spot.shadows=LightShadows.Soft;spot.shadowStrength=.75f;
+            var fill=new GameObject("Light fill").AddComponent<Light>();
+            fill.transform.SetParent(root,false);fill.transform.position=new Vector3(x,CeilY-.25f,z);
+            fill.type=LightType.Point;fill.range=5;fill.intensity=.8f;fill.color=white;fill.shadows=LightShadows.None;
+        }
+        var probe=new GameObject("Shop reflections").AddComponent<ReflectionProbe>();
+        probe.transform.SetParent(root,false);probe.transform.position=new Vector3((West+East)/2,(FloorY+CeilY)/2,(Back+Front)/2);
+        probe.size=new Vector3(East-West,CeilY-FloorY,Front-Back);probe.boxProjection=true;probe.resolution=128;probe.importance=2;
+        probe.mode=UnityEngine.Rendering.ReflectionProbeMode.Realtime;probe.refreshMode=UnityEngine.Rendering.ReflectionProbeRefreshMode.OnAwake;
+        probe.timeSlicingMode=UnityEngine.Rendering.ReflectionProbeTimeSlicingMode.AllFacesAtOnce;
     }
 
     // one quad facing `facing`, its UVs from the world position by `uv`
