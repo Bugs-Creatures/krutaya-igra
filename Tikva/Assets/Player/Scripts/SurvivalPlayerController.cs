@@ -55,14 +55,14 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     public bool tankControlsIndoors=true;
     public bool tankControlsOutdoors=true;
     [Header("Movement")]
-    public float walkSpeed=2.4f;
-    public float runMultiplier=1.5f;
+    public float walkSpeed=2.9f;
+    public float runMultiplier=1.55f;
     public float backwardSpeedMultiplier=.75f;
-    public float tankTurnSpeed=140;
-    public float turnSpeed=540;
+    public float tankTurnSpeed=170;
+    public float turnSpeed=640;
     public float gravity=22;
     public float jumpHeight=1;
-    public float mouseSensitivity=.12f;
+    public float mouseSensitivity=.14f;
     public Animator animator;
     public SurvivalCameraRig cameraRig;
     public Renderer[] modelRenderers;

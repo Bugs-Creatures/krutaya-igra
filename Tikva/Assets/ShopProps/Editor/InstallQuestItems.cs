@@ -7,11 +7,8 @@ using UnityEngine;
 // and renderer (or its cube child) go, the model goes in as a child "Model" standing where the cube
 // stood (same footprint centre, same bottom; the shovel on the ground by the bench, where it is not on
 // top of the others), the item's origin moves to the middle of the model (that is what the hand holds),
-// its scale goes back to 1 and its box collider is fitted round the model. The item keeps its name and
-// its own components (InteractionObject, Rigidbody, quest scripts). Small things get a collider a little
-// larger than themselves so the cursor finds them, and where the collider of what they lie on stands
-// higher than its mesh (the bench's box rides 14 cm over the seat) theirs is stretched up past it, or a
-// key 8 mm thick would hide inside the bench's and the aim would hit the bench. The crafted
+// its scale goes back to 1 and its colliders follow the model (FitPickupColliders). The item keeps its name and
+// its own components (InteractionObject, Rigidbody, quest scripts). The crafted
 // rope-and-hook prefab gets its model too. Safe to run again.
 public static class InstallQuestItems
 {
@@ -70,24 +67,12 @@ public static class InstallQuestItems
             b=Around(go);
             go.transform.position+=t.position-b.center;
             b=Around(go);
-            var box=item.GetComponent<BoxCollider>();
-            if(box)Fit(box,t,b,rest+.03f);
+            FitPickupColliders.Fit(item.gameObject);
             Physics.SyncTransforms();
             Debug.Log($"QUESTITEM {itemName} <- {model}: stood {was.size} at {was.center}, now {b.size} bottom {b.min.y:0.000}, aim {(item.gameObject.activeInHierarchy?Aim(item):"(off)")}");
         }
         CraftedPrefab();
         EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
-    }
-
-    // the collider round the model, at least 5 cm each way and up to minTop at least (grown upwards, so it
-    // still sits on its bottom)
-    static void Fit(BoxCollider box,Transform t,Bounds b,float minTop=float.MinValue)
-    {
-        var s=t.InverseTransformVector(b.size);s=new Vector3(Mathf.Abs(s.x),Mathf.Abs(s.y),Mathf.Abs(s.z));
-        var c=t.InverseTransformPoint(b.center);
-        var size=Vector3.Max(s,Vector3.one*.05f);
-        size.y=Mathf.Max(size.y,minTop-b.min.y);
-        box.size=size;box.center=c+Vector3.up*((size.y-s.y)/2);
     }
 
     // the height of whatever is under foot, not counting the item itself
@@ -102,7 +87,7 @@ public static class InstallQuestItems
     // what the player's cursor would pick from a step away and a little above, as PlayerInteraction.TargetAt does
     static string Aim(InteractionObject item)
     {
-        var c=item.GetComponent<Collider>().bounds.center;
+        var c=item.GetComponentInChildren<Collider>().bounds.center;
         var ray=new Ray(c+new Vector3(1.2f,1.1f,0.4f),(c-(c+new Vector3(1.2f,1.1f,0.4f))).normalized);
         var hits=Physics.RaycastAll(ray,5f,~(1<<2),QueryTriggerInteraction.Ignore).OrderBy(h=>h.distance).ToArray();
         if(hits.Length==0)return "nothing";
@@ -122,7 +107,7 @@ public static class InstallQuestItems
         go.name="Model";go.transform.SetParent(root.transform,false);
         go.transform.localPosition=Vector3.zero;go.transform.localRotation=Quaternion.Euler(90,0,0)*upright;
         var b=Around(go);go.transform.position+=root.transform.position-b.center;b=Around(go);
-        var box=root.GetComponent<BoxCollider>();if(box)Fit(box,root.transform,b);
+        FitPickupColliders.Fit(root);
         PrefabUtility.SaveAsPrefabAsset(root,path);PrefabUtility.UnloadPrefabContents(root);
         Debug.Log($"QUESTITEM {path} <- Item_GrapplingHookRope: {b.size}");
     }

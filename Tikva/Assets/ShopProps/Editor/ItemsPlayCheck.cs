@@ -31,10 +31,13 @@ public static class ItemsPlayCheck
         waitUntil=Time.realtimeSinceStartup+1.5f;EditorApplication.update-=Step;EditorApplication.update+=Step;
     }
     static InteractionObject Item(string name)=>Object.FindObjectsByType<InteractionObject>(FindObjectsInactive.Include,FindObjectsSortMode.None).First(o=>o.name==name);
-    static bool Aimed(PlayerInteraction i,InteractionObject item)
+    static bool Aimed(PlayerInteraction i,InteractionObject item,Vector3 from)
     {
-        var c=item.GetComponent<Collider>().bounds.center;var from=c+new Vector3(.8f,1.0f,.3f);
-        return i.TargetAt(new Ray(from,(c-from).normalized))==item;
+        var c=item.GetComponentInChildren<Collider>().bounds.center;from+=c;var ray=new Ray(from,(c-from).normalized);
+        if(i.TargetAt(ray)==item)return true;
+        var first=Physics.RaycastAll(ray,5,i.aimLayers,QueryTriggerInteraction.Ignore).Where(h=>!h.transform.IsChildOf(i.transform)).OrderBy(h=>h.distance).FirstOrDefault();
+        Debug.Log($"ITEMCHECK {item.name} at {c}: the aim meets {(first.collider?first.collider.name+" at "+first.point:"nothing")}");
+        return false;
     }
     static void Step()
     {
@@ -46,9 +49,11 @@ public static class ItemsPlayCheck
             foreach(var n in new[]{"Ключ","Плоскогубцы","Лопата","vodka"})
             {
                 var it=Item(n);p.Teleport(it.transform.position+new Vector3(.9f,0,0)-Vector3.up*it.transform.position.y);
-                r[n+": under the cursor"]=Aimed(i,it);
-                r[n+": still where it lay"]=it.transform.Find("Model")&&it.GetComponent<Collider>().bounds.min.y>-.01f;
+                r[n+": under the cursor"]=Aimed(i,it,new Vector3(.8f,1.0f,.3f));
+                r[n+": still where it lay"]=it.transform.Find("Model")&&it.GetComponentInChildren<Collider>().bounds.min.y>-.01f;
             }
+            foreach(var (n,from) in new[]{("screwdriver",new Vector3(.6f,.4f,.2f)),("crowbar",new Vector3(-.6f,.4f,.2f))})   // indoors, under a ceiling: from closer and lower
+                r[n+": under the cursor"]=Aimed(i,Item(n),from);
             var pliers=Item("Плоскогубцы");p.Teleport(pliers.transform.position+new Vector3(.9f,0,0)-Vector3.up*pliers.transform.position.y);
             r["pliers come to hand"]=i.TryInteract(pliers)&&i.heldItem==pliers;
             i.DropHeld();
