@@ -10,7 +10,8 @@ using UnityEngine.SceneManagement;
 // of the serve-over counters. All of them share the team's texture set (Product_Props). Every shelf holds a single product,
 // changing from shelf to shelf, in neat blocks of a few facings and a few rows deep; each item is
 // put down where a ray from above meets the shelf, label to the aisle, half as large again as life,
-// less where the shelf above leaves no room. Decoration only: no colliders.
+// less where the shelf above leaves no room. Decoration only: no colliders. The pumpkins for the produce
+// crates are the exception: rigid bodies over the crates that fall in when the game starts.
 public static class InstallShopProducts
 {
     const string Root = "Assets/ShopProps/";
@@ -77,11 +78,12 @@ public static class InstallShopProducts
             shelves++;
         }
 
-        // a crate of pumpkins: a layer filling the crate floor, a second one in the hollows between four below;
-        // each a little larger or smaller than the model, turned and tipped at random
+        // a crate of pumpkins, half as large again as the model and more: rigid bodies hung in the air over the
+        // crate, in columns over its floor, that drop into it and settle when the game starts
         var pumpkin=AssetDatabase.LoadAssetAtPath<GameObject>(Root+"Models/Item_Pumpkin.fbx");
         var pumpkinSize=pumpkin.GetComponent<MeshFilter>().sharedMesh.bounds.size;
-        float pr=Mathf.Max(pumpkinSize.x,pumpkinSize.y)/2,ph=pumpkinSize.z,ball=(pr+ph/2)/2;
+        float pr=Mathf.Max(pumpkinSize.x,pumpkinSize.y)/2,ph=pumpkinSize.z;
+        const float PumpkinMin=1.35f,PumpkinMax=1.6f;const int PerCrate=7;
         int pumpkins=0;
         void Pumpkins(Transform crate)
         {
@@ -91,39 +93,24 @@ public static class InstallShopProducts
             for(float x=box.min.x;x<=box.max.x;x+=.02f)for(float z=box.min.z;z<=box.max.z;z+=.02f)
                 if(Physics.Raycast(new Vector3(x,box.max.y+.3f,z),Vector3.down,out var hit,box.size.y+.6f,~0,QueryTriggerInteraction.Ignore)&&hit.transform==crate&&hit.normal.y>.9f)cells.Add(hit.point);
             float floorY=cells.Min(c=>c.y);cells.RemoveAll(c=>c.y>floorY+.015f);
-            float x0=cells.Min(c=>c.x)+.01f,x1=cells.Max(c=>c.x)-.01f,z0=cells.Min(c=>c.z)+.01f,z1=cells.Max(c=>c.z)-.01f;
-            int nx=Mathf.Max(1,Mathf.FloorToInt((x1-x0)/(pr*2.04f))),nz=Mathf.Max(1,Mathf.FloorToInt((z1-z0)/(pr*2.04f)));
-            float sx=(x1-x0)/nx,sz=(z1-z0)/nz,fit=Mathf.Min(sx,sz)/(pr*2.04f);
-            var laid=new List<(Vector3 centre,float s)>();
-            void Put(Vector3 centre,float s)
+            float x0=cells.Min(c=>c.x),x1=cells.Max(c=>c.x),z0=cells.Min(c=>c.z),z1=cells.Max(c=>c.z);
+            int nx=Mathf.Max(1,Mathf.FloorToInt((x1-x0)/(pr*2*PumpkinMax))),nz=Mathf.Max(1,Mathf.FloorToInt((z1-z0)/(pr*2*PumpkinMax)));
+            float sx=(x1-x0)/nx,sz=(z1-z0)/nz;
+            for(int n=0;n<PerCrate;n++)
             {
+                int column=n%(nx*nz),level=n/(nx*nz);float s=PumpkinMin+(float)rnd.NextDouble()*(PumpkinMax-PumpkinMin);
+                var centre=new Vector3(x0+sx*(column/nz+.5f)+((float)rnd.NextDouble()*2-1)*.04f,
+                                       box.max.y+.15f+ph*PumpkinMax*(level+.5f)+level*.12f,
+                                       z0+sz*(column%nz+.5f)+((float)rnd.NextDouble()*2-1)*.04f);
                 var go=(GameObject)PrefabUtility.InstantiatePrefab(pumpkin,scene);
                 var upright=go.transform.rotation;
                 go.transform.SetParent(root,false);
-                go.transform.rotation=Quaternion.Euler((float)rnd.NextDouble()*12-6,(float)rnd.NextDouble()*360,(float)rnd.NextDouble()*12-6)*upright;
+                go.transform.rotation=Quaternion.Euler((float)rnd.NextDouble()*30-15,(float)rnd.NextDouble()*360,(float)rnd.NextDouble()*30-15)*upright;
                 go.transform.localScale*=s;
-                var b=go.GetComponent<Renderer>().bounds;
-                go.transform.position+=new Vector3(centre.x-b.center.x,centre.y-ph*s/2-b.min.y,centre.z-b.center.z);
-                GameObjectUtility.SetStaticEditorFlags(go,StaticEditorFlags.BatchingStatic);
-                laid.Add((centre,s));pumpkins++;tris+=go.GetComponent<MeshFilter>().sharedMesh.triangles.Length/3;
-            }
-            for(int i=0;i<nx;i++)for(int j=0;j<nz;j++)
-            {
-                float s=Mathf.Min(fit,.88f+(float)rnd.NextDouble()*.22f),jx=(sx/2-pr*s)*.8f,jz=(sz/2-pr*s)*.8f;
-                var p=new Vector3(x0+sx*(i+.5f)+((float)rnd.NextDouble()*2-1)*jx,0,z0+sz*(j+.5f)+((float)rnd.NextDouble()*2-1)*jz);
-                Put(new Vector3(p.x,floorY+.003f+ph*s/2,p.z),s);
-            }
-            for(int i=0;i+1<nx;i++)for(int j=0;j+1<nz;j++)   // resting on the four below, now and then one left out
-            {
-                if(rnd.NextDouble()<.25)continue;
-                var four=new[]{laid[i*nz+j],laid[i*nz+j+1],laid[(i+1)*nz+j],laid[(i+1)*nz+j+1]};
-                float s=.82f+(float)rnd.NextDouble()*.18f;var p=Flat2(four.Aggregate(Vector3.zero,(v,l)=>v+l.centre)/4);
-                float y=0;foreach(var l in four)
-                {
-                    float d=Vector3.Distance(Flat2(l.centre),p),reach=(l.s+s)*ball;
-                    y=Mathf.Max(y,l.centre.y+(d<reach?Mathf.Sqrt(reach*reach-d*d):0));
-                }
-                Put(new Vector3(p.x,y,p.z),s);
+                go.transform.position+=centre-go.GetComponent<Renderer>().bounds.center;
+                go.AddComponent<MeshCollider>().convex=true;
+                var body=go.AddComponent<Rigidbody>();body.mass=4*s*s*s;body.angularDamping=1.5f;
+                pumpkins++;tris+=go.GetComponent<MeshFilter>().sharedMesh.triangles.Length/3;
             }
         }
 
