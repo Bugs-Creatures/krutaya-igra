@@ -35,6 +35,10 @@ public sealed class InteractionObject : MonoBehaviour
     [Range(0,1)] public float soundVolume=.8f;
     public bool IsHeld {get;private set;}
     public bool IsOpen {get;private set;}
+    public bool HasBeenPickedUpByPlayer {get;private set;}
+    public bool IsDroppedByPlayer {get;private set;}
+    public void RecordPlayerPickup(){HasBeenPickedUpByPlayer=true;IsDroppedByPlayer=false;}
+    public void RecordPlayerDrop(){if(HasBeenPickedUpByPlayer)IsDroppedByPlayer=true;}
     public string ItemName=>string.IsNullOrWhiteSpace(displayName)?name:displayName;
     public string Prompt(bool firstPerson,bool inReach=true)
     {

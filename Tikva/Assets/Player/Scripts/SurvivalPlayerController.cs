@@ -101,7 +101,11 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     }
     void Update()
     {
-        if(modalInputLocked||dialogueClickFrame==Time.frameCount)return;
+        if(modalInputLocked||dialogueClickFrame==Time.frameCount)
+        {
+            if(animator){animator.SetBool(walkingParameter,false);animator.SetBool("isWalkingBackward",false);animator.SetBool("isRunning",false);}
+            return;
+        }
         if(ShopReturning){AdvanceShopReturn(Time.deltaTime);return;}
         if(dialogueLocked){Move(Vector2.zero,Vector2.zero,false,false,Time.deltaTime);return;}
         if(appliedMode!=EffectiveFirstPerson)ApplyMode();
