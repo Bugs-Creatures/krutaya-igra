@@ -77,6 +77,56 @@ public static class InstallShopProducts
             shelves++;
         }
 
+        // a crate of pumpkins: a layer filling the crate floor, a second one in the hollows between four below;
+        // each a little larger or smaller than the model, turned and tipped at random
+        var pumpkin=AssetDatabase.LoadAssetAtPath<GameObject>(Root+"Models/Item_Pumpkin.fbx");
+        var pumpkinSize=pumpkin.GetComponent<MeshFilter>().sharedMesh.bounds.size;
+        float pr=Mathf.Max(pumpkinSize.x,pumpkinSize.y)/2,ph=pumpkinSize.z,ball=(pr+ph/2)/2;
+        int pumpkins=0;
+        void Pumpkins(Transform crate)
+        {
+            var box=crate.GetComponent<Renderer>().bounds;
+            // the floor: the lowest upward face of the crate under a ray from above, and how far it reaches
+            var cells=new List<Vector3>();
+            for(float x=box.min.x;x<=box.max.x;x+=.02f)for(float z=box.min.z;z<=box.max.z;z+=.02f)
+                if(Physics.Raycast(new Vector3(x,box.max.y+.3f,z),Vector3.down,out var hit,box.size.y+.6f,~0,QueryTriggerInteraction.Ignore)&&hit.transform==crate&&hit.normal.y>.9f)cells.Add(hit.point);
+            float floorY=cells.Min(c=>c.y);cells.RemoveAll(c=>c.y>floorY+.015f);
+            float x0=cells.Min(c=>c.x)+.01f,x1=cells.Max(c=>c.x)-.01f,z0=cells.Min(c=>c.z)+.01f,z1=cells.Max(c=>c.z)-.01f;
+            int nx=Mathf.Max(1,Mathf.FloorToInt((x1-x0)/(pr*2.04f))),nz=Mathf.Max(1,Mathf.FloorToInt((z1-z0)/(pr*2.04f)));
+            float sx=(x1-x0)/nx,sz=(z1-z0)/nz,fit=Mathf.Min(sx,sz)/(pr*2.04f);
+            var laid=new List<(Vector3 centre,float s)>();
+            void Put(Vector3 centre,float s)
+            {
+                var go=(GameObject)PrefabUtility.InstantiatePrefab(pumpkin,scene);
+                var upright=go.transform.rotation;
+                go.transform.SetParent(root,false);
+                go.transform.rotation=Quaternion.Euler((float)rnd.NextDouble()*12-6,(float)rnd.NextDouble()*360,(float)rnd.NextDouble()*12-6)*upright;
+                go.transform.localScale*=s;
+                var b=go.GetComponent<Renderer>().bounds;
+                go.transform.position+=new Vector3(centre.x-b.center.x,centre.y-ph*s/2-b.min.y,centre.z-b.center.z);
+                GameObjectUtility.SetStaticEditorFlags(go,StaticEditorFlags.BatchingStatic);
+                laid.Add((centre,s));pumpkins++;tris+=go.GetComponent<MeshFilter>().sharedMesh.triangles.Length/3;
+            }
+            for(int i=0;i<nx;i++)for(int j=0;j<nz;j++)
+            {
+                float s=Mathf.Min(fit,.88f+(float)rnd.NextDouble()*.22f),jx=(sx/2-pr*s)*.8f,jz=(sz/2-pr*s)*.8f;
+                var p=new Vector3(x0+sx*(i+.5f)+((float)rnd.NextDouble()*2-1)*jx,0,z0+sz*(j+.5f)+((float)rnd.NextDouble()*2-1)*jz);
+                Put(new Vector3(p.x,floorY+.003f+ph*s/2,p.z),s);
+            }
+            for(int i=0;i+1<nx;i++)for(int j=0;j+1<nz;j++)   // resting on the four below, now and then one left out
+            {
+                if(rnd.NextDouble()<.25)continue;
+                var four=new[]{laid[i*nz+j],laid[i*nz+j+1],laid[(i+1)*nz+j],laid[(i+1)*nz+j+1]};
+                float s=.82f+(float)rnd.NextDouble()*.18f;var p=Flat2(four.Aggregate(Vector3.zero,(v,l)=>v+l.centre)/4);
+                float y=0;foreach(var l in four)
+                {
+                    float d=Vector3.Distance(Flat2(l.centre),p),reach=(l.s+s)*ball;
+                    y=Mathf.Max(y,l.centre.y+(d<reach?Mathf.Sqrt(reach*reach-d*d):0));
+                }
+                Put(new Vector3(p.x,y,p.z),s);
+            }
+        }
+
         int module=0;
         foreach(Transform prop in props)
         {
@@ -99,11 +149,14 @@ public static class InstallShopProducts
                 case "Shop_Vitrine":       // the display deck behind the curved glass, up to the seller's work top
                     Shelf(prop,o,along,front,.775f*m,.42f*m,-.68f*m,.68f*m,Pick(Deli,0),3,.5f);
                     break;
+                case "Shop_ProduceBin":    // pumpkins
+                    Pumpkins(prop);
+                    break;
                 default:continue;
             }
             module++;
         }
-        Debug.Log($"SHOPPRODUCTS placed {placed} on {shelves} shelves, skipped {missed}, {tris} tris");
+        Debug.Log($"SHOPPRODUCTS placed {placed} on {shelves} shelves, skipped {missed}, {pumpkins} pumpkins, {tris} tris");
     }
     static Vector3 Flat2(Vector3 v)=>new Vector3(v.x,0,v.z);
 
