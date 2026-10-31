@@ -126,7 +126,7 @@ public static class InstallShopProducts
         Texture2D Tex(string name,bool normal,bool srgb)
         {
             var path=Root+"Products/"+name+".png";var ti=(TextureImporter)AssetImporter.GetAtPath(path);
-            ti.textureType=normal?TextureImporterType.NormalMap:TextureImporterType.Default;ti.sRGBTexture=srgb;ti.maxTextureSize=1024;ti.SaveAndReimport();
+            ti.textureType=normal?TextureImporterType.NormalMap:TextureImporterType.Default;ti.sRGBTexture=srgb;ti.maxTextureSize=2048;ti.anisoLevel=8;ti.SaveAndReimport();
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
         var pack=Mat("Product_Pack");

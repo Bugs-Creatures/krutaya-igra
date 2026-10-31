@@ -50,7 +50,7 @@ public static class InstallShopProps
         if(Mathf.Abs(floorTop-FloorY)>.0001f)floor.position+=Vector3.up*(FloorY-floorTop);
         // shelving a quarter larger than life, the counter and the small things a tenth or so, the new counters as built
         float Scale(string model)=>model switch{"Shop_Gondola" or "Shop_Fridge" or "Shop_ProduceBin"=>1.25f,"Shop_WallShelf"=>1.24f,
-                                               "Shop_PackingTable" or "Shop_Basket"=>1.15f,"Shop_Vitrine" or "Shop_VitrineCorner" or "Shop_Lamp"=>1f,_=>1.1f};
+                                               "Shop_PackingTable" or "Shop_Basket"=>1.15f,"Shop_Vitrine" or "Shop_VitrineCorner" or "Shop_Lamp" or "Shop_CashRegister" or "Shop_Scales"=>1f,_=>1.1f};
         GameObject Put(string model,float yaw,Transform under=null)
         {
             var go=(GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(Root+"Models/"+model+".fbx"),scene);
@@ -87,8 +87,10 @@ public static class InstallShopProps
         Row("Shop_Vitrine",90,3,inE,inB+corner,false,maxX:true);                        // to -X
         // the checkout by the shopfront, a few steps from the door: panels to the customers (-Z), register and
         // scales on it, keyboard to the cashier, who stands between it and the shopfront
-        float top=1.1f*Scale("Shop_Counter"),checkX=-13.3f,checkZ=-13.72f;
-        PutAt("Shop_Counter",checkX,0,checkZ,0);
+        const float checkX=-13.3f,checkZ=-13.72f;
+        var counter=Put("Shop_Counter",0);counter.transform.position=new Vector3(checkX,FloorY,checkZ);
+        Squash(counter,.92f);                                                           // of the usual height, not 1.2 m
+        float top=counter.GetComponent<Renderer>().bounds.max.y-FloorY;
         PutAt("Shop_CashRegister",checkX-.55f,top,checkZ,180);
         PutAt("Shop_Scales",checkX+.77f,top,checkZ,180);
         PutAt("Shop_Stool",checkX+.95f,0,-12.55f,0);
@@ -189,11 +191,21 @@ public static class InstallShopProps
         GameObjectUtility.SetStaticEditorFlags(go,StaticEditorFlags.BatchingStatic);
     }
 
+    // a prop scaled along whichever of its local axes stands upright to `height` metres, standing where it stood
+    static void Squash(GameObject go,float height)
+    {
+        var r=go.GetComponent<Renderer>();float bottom=r.bounds.min.y;
+        var up=go.transform.InverseTransformDirection(Vector3.up);
+        int axis=Mathf.Abs(up.x)>Mathf.Abs(up.y)?(Mathf.Abs(up.x)>Mathf.Abs(up.z)?0:2):(Mathf.Abs(up.y)>Mathf.Abs(up.z)?1:2);
+        var s=go.transform.localScale;s[axis]*=height/r.bounds.size.y;go.transform.localScale=s;
+        go.transform.position+=Vector3.up*(bottom-r.bounds.min.y);
+    }
+
     static Texture2D Tex(string name,bool normal,bool srgb)
     {
         var path=Root+"Textures/"+name+".png";var ti=(TextureImporter)AssetImporter.GetAtPath(path);
         ti.textureType=normal?TextureImporterType.NormalMap:TextureImporterType.Default;ti.sRGBTexture=srgb;ti.maxTextureSize=4096;ti.mipmapEnabled=true;
-        ti.wrapMode=TextureWrapMode.Repeat;ti.anisoLevel=normal?1:4;
+        ti.wrapMode=TextureWrapMode.Repeat;ti.anisoLevel=8;
         ti.SaveAndReimport();return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
     }
     static Material Mat(string name)
