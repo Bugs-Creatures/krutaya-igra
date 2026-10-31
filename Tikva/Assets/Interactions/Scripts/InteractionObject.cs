@@ -14,7 +14,7 @@ public sealed class InteractionObject : MonoBehaviour
     public string suspiciousHoverText="подозрительное действие";
     public string openedDoorHoverText="закрыть";
     public string tooFarHoverText="вы далеко";
-    [Min(8)] public float hoverTextSize=22;
+    [Min(8)] public float hoverTextSize=14;
     [Header("Held in camera modes - right hand")]
     [FormerlySerializedAs("heldLocalPosition")]
     public Vector3 thirdPersonHeldPosition=new Vector3(.04f,0,.02f);

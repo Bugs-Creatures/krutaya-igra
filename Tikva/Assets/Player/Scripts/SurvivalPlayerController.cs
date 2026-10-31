@@ -8,6 +8,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     [Tooltip("Enable for WASD + mouse + Space. The model is hidden only for the player camera.")]
     public bool firstPerson;
     [System.NonSerialized] public bool dialogueLocked;
+    [System.NonSerialized] public bool modalInputLocked;
     [System.NonSerialized] public int dialogueClickFrame=-1;
     public bool ShopReturning {get;private set;}
     Vector3 shopReturnStart,shopReturnEnd,shopLookTarget;
@@ -100,6 +101,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     }
     void Update()
     {
+        if(modalInputLocked||dialogueClickFrame==Time.frameCount)return;
         if(ShopReturning){AdvanceShopReturn(Time.deltaTime);return;}
         if(dialogueLocked){Move(Vector2.zero,Vector2.zero,false,false,Time.deltaTime);return;}
         if(appliedMode!=EffectiveFirstPerson)ApplyMode();
@@ -174,7 +176,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
             animator.SetBool("isRunning",moving && running);
         }
     }
-    void LateUpdate(){cameraRig.UpdateView(Time.deltaTime,pitch);if(appliedMode!=EffectiveFirstPerson)ApplyMode();}
+    void LateUpdate(){if(modalInputLocked)return;cameraRig.UpdateView(Time.deltaTime,pitch);if(appliedMode!=EffectiveFirstPerson)ApplyMode();}
     void OnDisable()
     {
         jumpInProgress=false;wasInAirAnimation=false;
