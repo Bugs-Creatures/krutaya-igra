@@ -65,12 +65,14 @@ public sealed class PlayerInteraction : MonoBehaviour
     }
     public bool TryInteract(InteractionObject item)
     {
-        if(!item||!item.Allowed(player.EffectiveFirstPerson)||!InReach(item))return false;
+        if(player.modalInputLocked||player.dialogueLocked||!item||!item.Allowed(player.EffectiveFirstPerson)||!InReach(item))return false;
         if(item.kind==InteractionKind.Talk){var talk=item.GetComponent<ITalkTarget>();if(talk!=null)talk.Talk();return true;}
         if(item.kind==InteractionKind.Door){item.ToggleDoor();return true;}
         var firstPerson=player.EffectiveFirstPerson;
         var anchor=AnchorForMode(firstPerson);if(!anchor)return false;
-        DropHeld();item.Attach(anchor,firstPerson);heldItem=item;player.currentHeldItem=item.ItemName;SetHovered(null);return true;
+        DropHeld();item.Attach(anchor,firstPerson);heldItem=item;player.currentHeldItem=item.ItemName;SetHovered(null);
+        var map=item.GetComponent<MapItem>();if(map)map.Open(this);
+        return true;
     }
     public bool ClickTarget(InteractionObject item,Vector2 screen)
     {
@@ -173,7 +175,7 @@ public sealed class PlayerInteraction : MonoBehaviour
     }
     void LateUpdate()
     {
-        if(player.dialogueLocked||player.ShopReturning||player.dialogueClickFrame==Time.frameCount){SetHovered(null);return;}
+        if(player.modalInputLocked||player.dialogueLocked||player.ShopReturning||player.dialogueClickFrame==Time.frameCount){SetHovered(null);return;}
         EnforceHeldRules();RefreshHeldGrip();var camera=player.cameraRig.output;UpdateFirstPersonHeldMotion(camera);var mouse=Mouse.current;
         if(!camera||mouse==null)return;
         Vector2 screen=player.EffectiveFirstPerson?new Vector2(Screen.width*.5f,Screen.height*.5f):mouse.position.ReadValue();
