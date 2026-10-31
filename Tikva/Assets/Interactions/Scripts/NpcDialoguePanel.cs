@@ -10,6 +10,7 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     TextMeshProUGUI label;
     readonly TextMeshProUGUI[] answers=new TextMeshProUGUI[2];
     string phrase;float letters,delay;Action<int> choice;Action finished;
+    float periodPauseSeconds,pauseRemaining,characterBudget;
     CursorLockMode oldLock;bool oldVisible;
     bool blocksInput;
     public bool IsOpen=>root&&root.gameObject.activeSelf;
@@ -24,8 +25,8 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     void Ensure()
     {
         if(root)return;interaction=UnityEngine.Object.FindAnyObjectByType<PlayerInteraction>();
-        root=Rect("Michael dialogue",interaction.prompt.transform,new Vector2(950,180),new Vector2(0,120));root.anchorMin=root.anchorMax=new Vector2(.5f,0);
-        background=Rect("Speech background",root,new Vector2(900,44),new Vector2(0,45));background.gameObject.AddComponent<UnityEngine.UI.Image>().color=new Color(.025f,.025f,.025f,.92f);
+        root=Rect(gameObject.name+" dialogue",interaction.prompt.transform,new Vector2(950,180),new Vector2(0,120));root.anchorMin=root.anchorMax=new Vector2(.5f,0);
+        background=Rect("Speech background",root,new Vector2(900,44),new Vector2(0,45));background.gameObject.AddComponent<UnityEngine.UI.Image>().color=new Color(.025f,.025f,.025f,1);
         label=Text(background,new Vector2(880,40),Vector2.zero);
         for(int n=0;n<2;n++)answers[n]=Text(root,new Vector2(900,38),new Vector2(0,-5-42*n));
         root.gameObject.SetActive(false);
@@ -41,8 +42,9 @@ public sealed class NpcDialoguePanel : MonoBehaviour
         }
         root.gameObject.SetActive(true);
     }
-    public void Say(string text,string first=null,string second=null,Action<int> selected=null,float hold=1,Action complete=null)
+    public void Say(string text,string first=null,string second=null,Action<int> selected=null,float hold=1,Action complete=null,float periodPause=0)
     {
+        periodPauseSeconds=Mathf.Max(0,periodPause);pauseRemaining=characterBudget=0;
         phrase=text;label.text=text;letters=text.IndexOf(':')+2;label.maxVisibleCharacters=(int)letters;
         var size=label.GetPreferredValues(text);background.sizeDelta=new Vector2(Mathf.Min(940,size.x+24),size.y+10);label.rectTransform.sizeDelta=background.sizeDelta-new Vector2(20,8);
         choice=selected;finished=complete;delay=hold;
@@ -53,7 +55,7 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     void Update()
     {
         if(!IsOpen)return;
-        letters+=35*Time.unscaledDeltaTime;label.maxVisibleCharacters=(int)letters;if(letters<phrase.Length)return;
+        AdvanceTypewriter(Time.unscaledDeltaTime);label.maxVisibleCharacters=(int)letters;if(letters<phrase.Length)return;
         if(choice!=null)
         {
             bool hovered=false;var mouse=Mouse.current;
@@ -67,6 +69,18 @@ public sealed class NpcDialoguePanel : MonoBehaviour
             interaction.prompt.SetInteractionCursor(hovered);
         }
         else {delay-=Time.unscaledDeltaTime;if(delay<=0){var callback=finished;finished=null;if(callback!=null)callback();else End();}}
+    }
+    void AdvanceTypewriter(float dt)
+    {
+        if(periodPauseSeconds<=0){letters+=35*dt;return;}
+        if(pauseRemaining>0){pauseRemaining=Mathf.Max(0,pauseRemaining-dt);return;}
+        characterBudget+=35*dt;
+        while(characterBudget>=1&&letters<phrase.Length)
+        {
+            characterBudget-=1;letters=Mathf.Floor(letters)+1;
+            if(phrase[(int)letters-1]=='.'&&letters<phrase.Length)
+            {pauseRemaining=periodPauseSeconds;characterBudget=0;break;}
+        }
     }
     public void Select(int index)
     {
@@ -84,3 +98,4 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     }
     void OnDisable(){if(IsOpen)End();}
 }
+

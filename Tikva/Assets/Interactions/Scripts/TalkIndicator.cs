@@ -43,7 +43,7 @@ public sealed class TalkIndicator : MonoBehaviour
         visible=visible&&!player.player.modalInputLocked;
         group.alpha=Mathf.MoveTowards(group.alpha,visible?1:0,Time.unscaledDeltaTime/Mathf.Max(.01f,fadeSeconds));
         RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)player.prompt.transform,screen,null,out var local);rect.anchoredPosition=local;
-        image.color=player.Hovered==target?Color.yellow:new Color(.78f,.78f,.78f,1);
+        image.color=player.Hovered==target&&player.InReach(target)?Color.yellow:new Color(.78f,.78f,.78f,1);
     }
     void OnDisable(){active.Remove(this);if(rect)Destroy(rect.gameObject);}
 }

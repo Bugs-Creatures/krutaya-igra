@@ -39,10 +39,10 @@ public sealed class InteractionOutline : MonoBehaviour
             }
         }
     }
-    public void Show(bool visible,Color color)
+    public void Show(bool visible,Color color,bool throughWalls=false,float widthOverride=-1)
     {
         if(visible)Build();IsShowing=visible;CurrentColor=color;
-        if(line){line.SetColor("_Color",color);line.SetFloat("_Pixels",width);}
+        if(line){line.SetColor("_Color",color);line.SetFloat("_Pixels",widthOverride>=0?widthOverride:width);line.SetFloat("_ZTest",throughWalls?8:4);mask.SetFloat("_ZTest",throughWalls?8:4);}
         foreach(var shell in shells)if(shell)shell.enabled=visible;
     }
     void OnDisable()=>Show(false,Color.green);

@@ -29,7 +29,7 @@ public sealed class ShopDialogue : MonoBehaviour, ITalkTarget
         wasInside=Inside(safePosition);
         panel=Rect("Cashier dialogue",interaction.prompt.transform,new Vector2(650,160),new Vector2(0,115));
         speechBackground=Rect("Speech background",panel,new Vector2(610,40),new Vector2(0,45));
-        speechBackground.gameObject.AddComponent<UnityEngine.UI.Image>().color=new Color(.025f,.025f,.025f,.92f);
+        speechBackground.gameObject.AddComponent<UnityEngine.UI.Image>().color=new Color(.025f,.025f,.025f,1);
         text=Label(speechBackground,"",new Vector2(590,32),Vector2.zero);
         text.alignment=TextAlignmentOptions.Center;
         payButton=Rect("Pay",panel,new Vector2(290,36),new Vector2(0,-5));
@@ -119,3 +119,4 @@ public sealed class ShopDialogue : MonoBehaviour, ITalkTarget
     }
     void OnDisable(){if(player)player.dialogueLocked=false;if(panel)panel.gameObject.SetActive(false);}
 }
+

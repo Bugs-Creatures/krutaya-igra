@@ -65,29 +65,40 @@ public sealed class PlayerInteraction : MonoBehaviour
     }
     public bool TryInteract(InteractionObject item)
     {
-        if(player.modalInputLocked||player.dialogueLocked||!item||!item.Allowed(player.EffectiveFirstPerson)||!InReach(item))return false;
+        if(player.modalInputLocked||player.dialogueLocked||!item||!item.isActiveAndEnabled||!item.Allowed(player.EffectiveFirstPerson)||!InReach(item))return false;
+        if(item.kind==InteractionKind.ToolAction){var action=item.GetComponent<ToolActionTarget>();return action&&action.TryUse(this);}
         if(item.kind==InteractionKind.Talk){var talk=item.GetComponent<ITalkTarget>();if(talk!=null)talk.Talk();return true;}
         if(item.kind==InteractionKind.Door){item.ToggleDoor();return true;}
+        var map=item.GetComponent<MapItem>();
+        if(map){SetHovered(null);map.Collect(this);return true;}
+        var crafting=GetComponent<RopeHookCrafting>();
+        if(crafting&&crafting.TryCombine(this,item)){SetHovered(null);return true;}
         var firstPerson=player.EffectiveFirstPerson;
         var anchor=AnchorForMode(firstPerson);if(!anchor)return false;
         DropHeld();item.Attach(anchor,firstPerson);heldItem=item;player.currentHeldItem=item.ItemName;SetHovered(null);
-        var map=item.GetComponent<MapItem>();if(map)map.Open(this);
+        item.RecordPlayerPickup();
         return true;
     }
     public bool ClickTarget(InteractionObject item,Vector2 screen)
     {
-        if(!item)return false;
+        if(!item||player.modalInputLocked||player.dialogueLocked||player.ShopReturning)return false;
         var firstPerson=player.EffectiveFirstPerson;var inReach=InReach(item);
+        if(item.suspicious&&!firstPerson)GetComponent<PlayerTutorialHud>()?.SuspiciousAttempt(item);
         if(!inReach||!item.Allowed(firstPerson))
         {
             if(prompt)prompt.ShowClickFeedback(item,screen,firstPerson,inReach);
             return false;
         }
         bool succeeded=TryInteract(item);
+        if(!succeeded&&item.kind==InteractionKind.ToolAction)
+        {
+            var action=item.GetComponent<ToolActionTarget>();
+            if(action&&!string.IsNullOrEmpty(action.LastFailure)&&prompt)prompt.ShowClickFeedback(item,screen,firstPerson,inReach,action.LastFailure);
+        }
         if(succeeded&&prompt)prompt.ClearFeedback();
         return succeeded;
     }
-    public void DropHeld()
+    public void DropHeld(bool forcedByCamera=false)
     {
         ResetHeldMotion();
         if(!heldItem){heldItem=null;player.currentHeldItem="";return;}
@@ -99,7 +110,10 @@ public sealed class PlayerInteraction : MonoBehaviour
             foreach(var c in Physics.OverlapSphere(point+offset,.32f,~0,QueryTriggerInteraction.Ignore))if(!c.transform.IsChildOf(transform)&&!c.transform.IsChildOf(heldItem.transform)){free=false;break;}
             if(free){point+=offset;break;}
         }
-        heldItem.Drop(point,playerColliders);heldItem=null;player.currentHeldItem="";
+        heldItem.Drop(point,playerColliders);heldItem.RecordPlayerDrop();
+        if(heldItem.IsDroppedByPlayer)GetComponent<PlayerTutorialHud>()?.ItemDropped(heldItem);
+        if(forcedByCamera&&heldItem.suspicious)GetComponent<PlayerTutorialHud>()?.SuspiciousDroppedByCamera();
+        heldItem=null;player.currentHeldItem="";
     }
     // Hands the held item over to someone else (an NPC takes it): the item stays held, now by them.
     public InteractionObject TakeHeld()
@@ -108,7 +122,7 @@ public sealed class PlayerInteraction : MonoBehaviour
     }
     public void EnforceHeldRules()
     {
-        if(heldItem && heldItem.suspicious && !player.EffectiveFirstPerson)DropHeld();
+        if(heldItem && heldItem.suspicious && !player.EffectiveFirstPerson)DropHeld(true);
         if(!heldItem)player.currentHeldItem="";
     }
     public void RefreshHeldGrip()
@@ -175,8 +189,9 @@ public sealed class PlayerInteraction : MonoBehaviour
     }
     void LateUpdate()
     {
+        EnforceHeldRules();
         if(player.modalInputLocked||player.dialogueLocked||player.ShopReturning||player.dialogueClickFrame==Time.frameCount){SetHovered(null);return;}
-        EnforceHeldRules();RefreshHeldGrip();var camera=player.cameraRig.output;UpdateFirstPersonHeldMotion(camera);var mouse=Mouse.current;
+        RefreshHeldGrip();var camera=player.cameraRig.output;UpdateFirstPersonHeldMotion(camera);var mouse=Mouse.current;
         if(!camera||mouse==null)return;
         Vector2 screen=player.EffectiveFirstPerson?new Vector2(Screen.width*.5f,Screen.height*.5f):mouse.position.ReadValue();
         SetHovered(TargetAt(camera.ScreenPointToRay(screen)));

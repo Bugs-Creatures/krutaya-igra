@@ -8,6 +8,7 @@ Shader "Interaction/Outline"
         _ColorMask("Color mask",Float)=15
         _StencilComp("Stencil comparison",Float)=6
         _StencilPass("Stencil operation",Float)=0
+        _ZTest("Depth comparison",Float)=4
     }
     SubShader
     {
@@ -15,7 +16,7 @@ Shader "Interaction/Outline"
         Pass
         {
             Tags {"LightMode"="SRPDefaultUnlit"}
-            Cull [_Cull] ZWrite Off ZTest LEqual ColorMask [_ColorMask]
+            Cull [_Cull] ZWrite Off ZTest [_ZTest] ColorMask [_ColorMask]
             Stencil {Ref 221 Comp [_StencilComp] Pass [_StencilPass]}
             HLSLPROGRAM
             #pragma vertex vert
