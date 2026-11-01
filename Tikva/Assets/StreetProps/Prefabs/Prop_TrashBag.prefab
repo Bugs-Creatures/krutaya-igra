@@ -58,15 +58,18 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 138bdf36426444045a6180f8288d3c78, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4088326542824526163}
+      addedObject: {fileID: 8388861377128806264}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 138bdf36426444045a6180f8288d3c78, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3577722438145283973}
   m_SourcePrefab: {fileID: 100100000, guid: 138bdf36426444045a6180f8288d3c78, type: 3}
 --- !u!1 &4562168694750637658 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 138bdf36426444045a6180f8288d3c78, type: 3}
   m_PrefabInstance: {fileID: 3715889226261844747}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &4088326542824526163
-MeshCollider:
+--- !u!65 &8388861377128806264
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -83,7 +86,33 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3583491, y: 0.3829238, z: 0.6495011}
+  m_Center: {x: 0, y: 0, z: 0.32475054}
+--- !u!54 &3577722438145283973
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4562168694750637658}
   serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -6716444048836738589, guid: 138bdf36426444045a6180f8288d3c78, type: 3}
+  m_Mass: 3
+  m_LinearDamping: 0
+  m_AngularDamping: 0.5
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 2

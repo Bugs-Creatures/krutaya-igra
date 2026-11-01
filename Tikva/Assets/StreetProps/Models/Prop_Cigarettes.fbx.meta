@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Dumpster
+    second: {fileID: 2100000, guid: 4db16a63ed6a8f94aaca057564e0bcb0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Shopopos
     second: {fileID: 2100000, guid: be75bc8aaca63d94994ebe7f973b09ba, type: 2}
   materials:

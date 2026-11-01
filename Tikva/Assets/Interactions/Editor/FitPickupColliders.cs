@@ -31,12 +31,22 @@ public static class FitPickupColliders
         EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
     }
 
-    // a convex mesh collider on every mesh of the item, nothing else
+    // a convex mesh collider on every mesh of the item, nothing else; the bottle is round and its hull would
+    // have more than the 255 faces Unity allows one, so it gets a capsule along its length
+    static readonly string[] Round={"vodka"};
     public static void Fit(GameObject item)
     {
         foreach(var c in item.GetComponentsInChildren<Collider>(true).Where(c=>!c.isTrigger))Object.DestroyImmediate(c);
         foreach(var f in item.GetComponentsInChildren<MeshFilter>(true).Where(f=>f.sharedMesh))
         {
+            if(Round.Contains(item.name))
+            {
+                var b=f.sharedMesh.bounds;var capsule=f.gameObject.AddComponent<CapsuleCollider>();
+                capsule.direction=b.size.x>=b.size.y&&b.size.x>=b.size.z?0:b.size.y>=b.size.z?1:2;
+                capsule.center=b.center;capsule.height=b.size[capsule.direction];
+                capsule.radius=Enumerable.Range(0,3).Where(a=>a!=capsule.direction).Max(a=>b.size[a])/2;
+                continue;
+            }
             var c=f.gameObject.AddComponent<MeshCollider>();c.sharedMesh=f.sharedMesh;c.convex=true;
         }
     }
