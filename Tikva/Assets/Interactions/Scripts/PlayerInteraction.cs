@@ -82,7 +82,12 @@ public sealed class PlayerInteraction : MonoBehaviour
         if(PauseMenu.BlocksGameplayInput)return false;
         if(player.modalInputLocked||player.dialogueLocked||!item||!item.isActiveAndEnabled||!item.Allowed(player.EffectiveFirstPerson)||!InReach(item))return false;
         if(item.kind==InteractionKind.ToolAction){var action=item.GetComponent<ToolActionTarget>();return action&&action.TryUse(this);}
-        if(item.kind==InteractionKind.Talk){var talk=item.GetComponent<ITalkTarget>();if(talk!=null)talk.Talk();return true;}
+        if(item.kind==InteractionKind.Talk)
+        {
+            var victim=item.GetComponent<NeighbourEndingTarget>();
+            if(victim&&victim.HasAxe(this))return victim.Kill(this);
+            var talk=item.GetComponent<ITalkTarget>();if(talk!=null)talk.Talk();return true;
+        }
         if(item.kind==InteractionKind.Door){item.ToggleDoor();return true;}
         var map=item.GetComponent<MapItem>();
         if(map){SetHovered(null);map.Collect(this);return true;}

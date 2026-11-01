@@ -37,7 +37,7 @@ public static class InstallDrunk
         }
         var body=drunk.GetComponent<CapsuleCollider>();if(!body){body=drunk.AddComponent<CapsuleCollider>();body.center=new Vector3(0,.9f,0);body.height=1.8f;body.radius=.35f;}
         var talk=drunk.GetComponent<InteractionObject>();if(!talk)talk=drunk.AddComponent<InteractionObject>();
-        talk.kind=InteractionKind.Talk;talk.suspicious=false;talk.reachDistance=4;talk.availableHoverText="поговорить";talk.displayName="Мужик";
+        talk.kind=InteractionKind.Talk;talk.suspicious=false;talk.reachDistance=4;talk.availableHoverText="поговорить";talk.displayName="Сосед";
         var sellerIndicator=seller.GetComponent<TalkIndicator>();var indicator=drunk.GetComponent<TalkIndicator>();if(!indicator)indicator=drunk.AddComponent<TalkIndicator>();
         if(sellerIndicator)indicator.icon=sellerIndicator.icon;
         // reward: a pickup cube by his feet, hidden until he gets the vodka

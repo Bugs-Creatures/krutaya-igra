@@ -31,6 +31,8 @@ public sealed class TalkIndicator : MonoBehaviour
     {
         if(PauseMenu.BlocksGameplayInput)return;
         if(!player||!rect)return;
+        var victim=target?target.GetComponent<NeighbourEndingTarget>():null;
+        if(victim&&victim.HasAxe(player)){group.alpha=0;return;}
         var camera=player.player.cameraRig.output;
         Vector3 position=head?head.position:transform.position+Vector3.up*1.8f;
         var screen=camera.WorldToScreenPoint(position+Vector3.up*headOffset);
