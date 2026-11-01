@@ -48,8 +48,12 @@ public sealed class PlayerInteraction : MonoBehaviour
     }
     public bool InReach(InteractionObject item)
     {
+        var pit=item.GetComponent<PitPickup>();
+        if(pit&&pit.IgnorePickupDistance)return true;
         var collider=item.GetComponentInChildren<Collider>();var origin=transform.position+Vector3.up;
-        var point=collider?collider.ClosestPoint(origin):item.transform.position;
+        // PhysX ClosestPoint does not support non-convex MeshColliders. Returning
+        // the query point there would accidentally make every distance zero.
+        var point=collider is MeshCollider mesh&&!mesh.convex?collider.bounds.ClosestPoint(origin):collider?collider.ClosestPoint(origin):item.transform.position;
         return Vector3.Distance(origin,point)<=item.reachDistance;
     }
     public InteractionObject TargetAt(Ray ray)
@@ -60,6 +64,7 @@ public sealed class PlayerInteraction : MonoBehaviour
         foreach(var hit in hits)
         {
             if(hit.transform.IsChildOf(transform))continue;
+            if(PitPickup.AllowsRayThrough(hit))continue;
             var item=hit.collider.GetComponentInParent<InteractionObject>();
             if(item&&item.isActiveAndEnabled&&!item.IsHeld)
             {
@@ -80,11 +85,14 @@ public sealed class PlayerInteraction : MonoBehaviour
         if(item.kind==InteractionKind.Door){item.ToggleDoor();return true;}
         var map=item.GetComponent<MapItem>();
         if(map){SetHovered(null);map.Collect(this);return true;}
+        var pit=item.GetComponent<PitPickup>();
+        if(pit&&pit.enabled&&!pit.CanRetrieve(this))return false;
         var crafting=GetComponent<RopeHookCrafting>();
         if(crafting&&crafting.TryCombine(this,item)){SetHovered(null);return true;}
         var firstPerson=player.EffectiveFirstPerson;
         var anchor=AnchorForMode(firstPerson);if(!anchor)return false;
         DropHeld();item.Attach(anchor,firstPerson);heldItem=item;player.currentHeldItem=item.ItemName;SetHovered(null);
+        if(pit)pit.MarkRetrieved();
         item.RecordPlayerPickup();
         return true;
     }
@@ -99,10 +107,12 @@ public sealed class PlayerInteraction : MonoBehaviour
             return false;
         }
         bool succeeded=TryInteract(item);
-        if(!succeeded&&item.kind==InteractionKind.ToolAction)
+        if(!succeeded)
         {
             var action=item.GetComponent<ToolActionTarget>();
-            if(action&&!string.IsNullOrEmpty(action.LastFailure)&&prompt)prompt.ShowClickFeedback(item,screen,firstPerson,inReach,action.LastFailure);
+            var pit=item.GetComponent<PitPickup>();
+            string failure=action?action.LastFailure:pit?pit.LastFailure:null;
+            if(!string.IsNullOrEmpty(failure)&&prompt)prompt.ShowClickFeedback(item,screen,firstPerson,inReach,failure);
         }
         if(succeeded&&prompt)prompt.ClearFeedback();
         return succeeded;

@@ -32,6 +32,16 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: handle
+    second: {fileID: 2100000, guid: 9dadd429cb0977f4994c93b87c49ecb9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: iron
+    second: {fileID: 2100000, guid: efd06b28f1387d746beb7560b384eb0f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: lamp_tube
     second: {fileID: 2100000, guid: 5abfb2bc4bf894746a2e0d4b28cbc483, type: 2}
   - first:
