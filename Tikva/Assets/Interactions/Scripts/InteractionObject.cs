@@ -65,13 +65,15 @@ public sealed class InteractionObject : MonoBehaviour
     bool originalDetectCollisions;
     bool dropSoundArmed;
     AudioSource soundSource;
+    Terrain lastTerrain;
     void Awake()
     {
         Outline=GetComponent<InteractionOutline>();if(!Outline)Outline=gameObject.AddComponent<InteractionOutline>();
-        colliders=GetComponentsInChildren<Collider>();colliderStates=new bool[colliders.Length];
+        colliders=kind==InteractionKind.Pickup?PickupPhysics.PrepareColliders(gameObject):GetComponentsInChildren<Collider>();colliderStates=new bool[colliders.Length];
         for(int i=0;i<colliders.Length;i++)colliderStates[i]=colliders[i].enabled;
         body=GetComponent<Rigidbody>();worldScale=transform.lossyScale;
         if(body){originalInterpolation=body.interpolation;originalDetectCollisions=body.detectCollisions;}
+        if(kind==InteractionKind.Pickup&&body)PickupPhysics.ConfigureBody(body);
         if(kind==InteractionKind.Door){if(!hinge)hinge=transform;closedRotation=hinge.localRotation;}
     }
     void Update()
@@ -80,6 +82,13 @@ public sealed class InteractionObject : MonoBehaviour
         openAmount=Mathf.MoveTowards(openAmount,IsOpen?1:0,Time.deltaTime/Mathf.Max(.01f,openingDuration));
         float t=Mathf.SmoothStep(0,1,openAmount);
         hinge.localRotation=closedRotation*Quaternion.AngleAxis(openAngle*t,hingeAxis.normalized);
+    }
+    void FixedUpdate()
+    {
+        // NPC rewards can be released by their dialogue scripts rather than Drop().
+        if(kind!=InteractionKind.Pickup||IsHeld||!body||body.isKinematic){lastTerrain=null;return;}
+        if(body.collisionDetectionMode!=CollisionDetectionMode.ContinuousDynamic)PickupPhysics.ConfigureBody(body);
+        if(!body.IsSleeping())PickupPhysics.GuardTerrain(body,colliders,ref lastTerrain);
     }
     public void ToggleDoor()
     {
@@ -105,12 +114,14 @@ public sealed class InteractionObject : MonoBehaviour
     {
         if(IsHeld||kind!=InteractionKind.Pickup||!anchor)return;
         dropSoundArmed=false;
+        lastTerrain=null;
         if(Outline)Outline.Show(false,PlayerInteraction.AvailableOutlineColor);
         if(body)
         {
             if(!body.isKinematic){body.linearVelocity=Vector3.zero;body.angularVelocity=Vector3.zero;}
             originalInterpolation=body.interpolation;originalDetectCollisions=body.detectCollisions;
             body.interpolation=RigidbodyInterpolation.None;
+            body.collisionDetectionMode=CollisionDetectionMode.ContinuousSpeculative;
             body.isKinematic=true;body.useGravity=false;body.detectCollisions=false;
         }
         for(int i=0;i<colliders.Length;i++)colliders[i].enabled=false;
@@ -131,6 +142,7 @@ public sealed class InteractionObject : MonoBehaviour
     public void Drop(Vector3 point,Collider[] playerColliders)
     {
         if(!IsHeld)return;
+        lastTerrain=null;
         transform.SetParent(null,true);transform.position=point;transform.localScale=worldScale;
         for(int i=0;i<colliders.Length;i++)
         {
@@ -144,7 +156,7 @@ public sealed class InteractionObject : MonoBehaviour
             originalDetectCollisions=body.detectCollisions;
         }
         body.isKinematic=false;body.useGravity=true;body.detectCollisions=originalDetectCollisions;
-        body.collisionDetectionMode=CollisionDetectionMode.ContinuousSpeculative;
+        body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;
         // Write the physics pose too: a pick-and-drop in one frame must not resume
         // from the rigidbody's old floor position or its previous hand position.
         body.interpolation=RigidbodyInterpolation.None;

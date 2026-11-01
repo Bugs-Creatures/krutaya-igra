@@ -21,6 +21,7 @@ public sealed class EndingTransition : MonoBehaviour
         if(IsRunning)return;
         endingScene=destination;
         IsRunning=true;
+        var broadcast=player.GetComponent<BroadcastCycle>();if(broadcast)broadcast.StopForEnding();
         var pause=player.GetComponent<PauseMenu>();if(pause)pause.enabled=false;
         player.modalInputLocked=true;
         var interaction=player.GetComponent<PlayerInteraction>();

@@ -7,6 +7,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     [Header("Mode")]
     [Tooltip("Enable for WASD + mouse + Space. The model is hidden only for the player camera.")]
     public bool firstPerson;
+    public event System.Action CamerasPermanentlyDisabled;
     [System.NonSerialized] public bool dialogueLocked;
     [System.NonSerialized] public bool modalInputLocked;
     [System.NonSerialized] public int dialogueClickFrame=-1;
@@ -79,9 +80,11 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     public void SetFirstPerson(bool value){firstPerson=value||(cameraRig&&cameraRig.CamerasDisabled);if(Application.isPlaying)ApplyMode();}
     public void DisableCamerasPermanently()
     {
+        bool wasDisabled=cameraRig&&cameraRig.CamerasDisabled;
         if(cameraRig)cameraRig.DisableCamerasPermanently();
         SetFirstPerson(true);
         if(cameraRig)cameraRig.UpdateView(0,pitch);
+        if(!wasDisabled)CamerasPermanentlyDisabled?.Invoke();
     }
     public void Teleport(Vector3 point)
     {
@@ -109,7 +112,8 @@ public sealed class SurvivalPlayerController : MonoBehaviour
         appliedMode=EffectiveFirstPerson;heldForward=Vector3.zero;inputLatched=false;
         cameraRig.SetFirstPerson(firstPerson);
         for(int i=0;i<modelRenderers.Length;i++)if(modelRenderers[i])modelRenderers[i].forceRenderingOff=EffectiveFirstPerson||rendererStates[i];
-        Cursor.lockState=EffectiveFirstPerson?CursorLockMode.Locked:CursorLockMode.None;Cursor.visible=!EffectiveFirstPerson;
+        if(!dialogueLocked&&!modalInputLocked)
+        {Cursor.lockState=EffectiveFirstPerson?CursorLockMode.Locked:CursorLockMode.None;Cursor.visible=!EffectiveFirstPerson;}
     }
     void Update()
     {

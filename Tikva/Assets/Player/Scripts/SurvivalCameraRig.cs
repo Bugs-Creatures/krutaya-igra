@@ -32,6 +32,16 @@ public sealed class SurvivalCameraRig : MonoBehaviour
     public float blindZoneMargin=.35f;
     public bool AutomaticFirstPerson {get;private set;}
     public bool CamerasDisabled {get;private set;}
+    public bool InBlindZone
+    {
+        get
+        {
+            if(!target||ActiveFixedCamera)return false;
+            if(blind&&blind.Contains(target.position,blindZoneMargin))return true;
+            foreach(var zone in CameraBlindZone.Active)if(zone&&zone.isActiveAndEnabled&&zone.Contains(target.position))return true;
+            return false;
+        }
+    }
     public bool IsFirstPerson=>CamerasDisabled||manualFirstPerson||AutomaticFirstPerson;
     public bool IsIndoors {get;private set;}
     public Camera ActiveFixedCamera {get;private set;}

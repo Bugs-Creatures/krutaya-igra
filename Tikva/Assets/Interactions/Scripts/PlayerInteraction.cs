@@ -9,6 +9,7 @@ public sealed class PlayerInteraction : MonoBehaviour
     public Transform rightHand;
     public Transform firstPersonAnchor;
     public InteractionObject heldItem;
+    public event Action<InteractionObject> CharacterInteracted;
     public LayerMask aimLayers=~(1<<2);
     [Header("First person held item motion")]
     [Min(0)] public float walkBobAmount=.018f;
@@ -101,7 +102,8 @@ public sealed class PlayerInteraction : MonoBehaviour
         {
             var victim=item.GetComponent<NeighbourEndingTarget>();
             if(victim&&victim.HasAxe(this))return victim.Kill(this);
-            var talk=item.GetComponent<ITalkTarget>();if(talk!=null)talk.Talk();return true;
+            var talk=item.GetComponent<ITalkTarget>();
+            if(talk!=null){talk.Talk();CharacterInteracted?.Invoke(item);}return true;
         }
         if(item.kind==InteractionKind.Door){item.ToggleDoor();return true;}
         var map=item.GetComponent<MapItem>();

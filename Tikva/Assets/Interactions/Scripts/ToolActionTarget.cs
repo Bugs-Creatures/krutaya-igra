@@ -73,6 +73,8 @@ public sealed class ToolActionTarget : MonoBehaviour
         {
             var key=interaction.TakeHeld();key.gameObject.SetActive(false);Destroy(key.gameObject);
         }
-        interaction.player.TeleportFirstPerson(destination);return true;
+        interaction.player.TeleportFirstPerson(destination);
+        if(action==ToolActionKind.EnterBasement)interaction.player.DisableCamerasPermanently();
+        return true;
     }
 }

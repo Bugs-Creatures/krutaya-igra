@@ -12,7 +12,7 @@ public sealed class PlayerMapInventory : MonoBehaviour
     public bool IsOpen {get;private set;}
     public Texture2D MapImage {get;private set;}
     PlayerInteraction interaction;GameObject overlay;Canvas canvas;CanvasGroup group;RectTransform panel,close;
-    IDisposable buttons;CursorLockMode oldLock;bool oldVisible;int openedFrame;float fade;bool closing;
+    IDisposable buttons;CursorLockMode oldLock;bool oldVisible,oldFirstPerson;int openedFrame;float fade;bool closing;
     public void Collect(Texture2D texture)
     {
         if(HasMap)return;MapImage=texture;HasMap=true;
@@ -34,7 +34,7 @@ public sealed class PlayerMapInventory : MonoBehaviour
     {
         if(!HasMap||IsOpen||interaction.player.modalInputLocked||interaction.player.dialogueLocked)return;
         if(!overlay)Build();IsOpen=true;HasOpenedMap=true;closing=false;fade=0;openedFrame=Time.frameCount;
-        oldLock=Cursor.lockState;oldVisible=Cursor.visible;interaction.player.modalInputLocked=true;
+        oldLock=Cursor.lockState;oldVisible=Cursor.visible;oldFirstPerson=interaction.player.EffectiveFirstPerson;interaction.player.modalInputLocked=true;
         interaction.prompt.ClearFeedback();interaction.prompt.Present(null,Vector2.zero,false);Cursor.lockState=CursorLockMode.None;Cursor.visible=true;
         overlay.SetActive(true);group.alpha=0;
         buttons=InputSystem.onAnyButtonPress.Call(control=>
@@ -58,7 +58,9 @@ public sealed class PlayerMapInventory : MonoBehaviour
     void FinishClose()
     {
         IsOpen=false;closing=false;overlay.SetActive(false);interaction.player.modalInputLocked=false;interaction.player.dialogueClickFrame=Time.frameCount;
-        Cursor.lockState=oldLock;Cursor.visible=oldVisible;interaction.prompt.UseDefaultCursor();
+        bool changed=oldFirstPerson!=interaction.player.EffectiveFirstPerson;
+        Cursor.lockState=changed?(interaction.player.EffectiveFirstPerson?CursorLockMode.Locked:CursorLockMode.None):oldLock;
+        Cursor.visible=changed?!interaction.player.EffectiveFirstPerson:oldVisible;interaction.prompt.UseDefaultCursor();
     }
     void OnDisable(){buttons?.Dispose();buttons=null;if(IsOpen)FinishClose();}
     void OnDestroy(){if(overlay)Destroy(overlay);}

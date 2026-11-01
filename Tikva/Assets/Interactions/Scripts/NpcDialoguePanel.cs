@@ -11,7 +11,7 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     readonly TextMeshProUGUI[] answers=new TextMeshProUGUI[2];
     string phrase;float letters,delay;Action<int> choice;Action finished;
     float periodPauseSeconds,pauseRemaining,characterBudget;
-    CursorLockMode oldLock;bool oldVisible;
+    CursorLockMode oldLock;bool oldVisible,oldFirstPerson;
     bool blocksInput;
     public bool IsOpen=>root&&root.gameObject.activeSelf;
     RectTransform Rect(string name,Transform parent,Vector2 size,Vector2 position)
@@ -36,7 +36,7 @@ public sealed class NpcDialoguePanel : MonoBehaviour
         Ensure();blocksInput=blockInput;
         if(blocksInput)
         {
-            oldLock=Cursor.lockState;oldVisible=Cursor.visible;
+            oldLock=Cursor.lockState;oldVisible=Cursor.visible;oldFirstPerson=interaction.player.EffectiveFirstPerson;
             interaction.player.dialogueLocked=true;interaction.prompt.ClearFeedback();interaction.prompt.Present(null,Vector2.zero,false);
             Cursor.lockState=CursorLockMode.None;Cursor.visible=true;interaction.prompt.UseDefaultCursor();
         }
@@ -94,7 +94,9 @@ public sealed class NpcDialoguePanel : MonoBehaviour
         if(blocksInput)
         {
             interaction.player.dialogueLocked=false;interaction.player.dialogueClickFrame=Time.frameCount;
-            Cursor.lockState=oldLock;Cursor.visible=oldVisible;interaction.prompt.UseDefaultCursor();
+            bool changed=oldFirstPerson!=interaction.player.EffectiveFirstPerson;
+            Cursor.lockState=changed?(interaction.player.EffectiveFirstPerson?CursorLockMode.Locked:CursorLockMode.None):oldLock;
+            Cursor.visible=changed?!interaction.player.EffectiveFirstPerson:oldVisible;interaction.prompt.UseDefaultCursor();
         }
     }
     void OnDisable(){if(IsOpen)End();}

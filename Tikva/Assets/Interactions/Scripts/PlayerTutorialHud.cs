@@ -25,7 +25,7 @@ public sealed class PlayerTutorialHud : MonoBehaviour
     readonly HashSet<InteractionObject> droppedItems=new();
     readonly Dictionary<InteractionObject,int> suspiciousAttempts=new();
     bool wasManualFirstPerson;
-    CursorLockMode oldLock;bool oldVisible;
+    CursorLockMode oldLock;bool oldVisible,oldFirstPerson;
     void Start()
     {
         interaction=GetComponent<PlayerInteraction>();player=interaction.player;map=GetComponent<PlayerMapInventory>();wasManualFirstPerson=player.firstPerson;Build();
@@ -81,7 +81,7 @@ public sealed class PlayerTutorialHud : MonoBehaviour
 
         pending.RemoveAll(id=>id=="map"&&map.HasOpenedMap);if(pending.Count==0)return;
         pages.Clear();pages.AddRange(pending);pending.Clear();page=0;showing=true;closing=false;popupFade=0;openedFrame=Time.frameCount;
-        oldLock=Cursor.lockState;oldVisible=Cursor.visible;player.modalInputLocked=true;interaction.prompt.ClearFeedback();interaction.prompt.Present(null,Vector2.zero,false);
+        oldLock=Cursor.lockState;oldVisible=Cursor.visible;oldFirstPerson=player.EffectiveFirstPerson;player.modalInputLocked=true;interaction.prompt.ClearFeedback();interaction.prompt.Present(null,Vector2.zero,false);
         Cursor.lockState=CursorLockMode.None;Cursor.visible=true;interaction.prompt.UseDefaultCursor();popup.SetActive(true);popupGroup.alpha=0;RenderPage();
     }
     void RenderPage()
@@ -105,7 +105,9 @@ public sealed class PlayerTutorialHud : MonoBehaviour
         showing=false;closing=false;if(popup)popup.SetActive(false);pages.Clear();
         if(!player)return;
         player.modalInputLocked=false;player.dialogueClickFrame=Time.frameCount;
-        Cursor.lockState=player.EffectiveFirstPerson?oldLock:CursorLockMode.None;Cursor.visible=player.EffectiveFirstPerson?oldVisible:true;
+        bool changed=oldFirstPerson!=player.EffectiveFirstPerson;
+        Cursor.lockState=changed?(player.EffectiveFirstPerson?CursorLockMode.Locked:CursorLockMode.None):oldLock;
+        Cursor.visible=changed?!player.EffectiveFirstPerson:oldVisible;
         if(interaction&&interaction.prompt)interaction.prompt.UseDefaultCursor();
     }
     void OnDisable(){if(showing)FinishHints();}
