@@ -45,6 +45,7 @@ public sealed class ToolActionTarget : MonoBehaviour
         if(action==ToolActionKind.ExitBasement)
         {
             if(!destination){LastFailure="Точка выхода не назначена.";return false;}
+            interaction.player.GetComponent<BroadcastCycle>()?.SetBasementMusic(false);
             interaction.player.TeleportFirstPerson(destination);
             interaction.player.DisableCamerasPermanently();
             return true;
@@ -80,7 +81,11 @@ public sealed class ToolActionTarget : MonoBehaviour
             var key=interaction.TakeHeld();key.gameObject.SetActive(false);Destroy(key.gameObject);
         }
         interaction.player.TeleportFirstPerson(destination);
-        if(action==ToolActionKind.EnterBasement)interaction.player.DisableCamerasPermanently();
+        if(action==ToolActionKind.EnterBasement)
+        {
+            interaction.player.GetComponent<BroadcastCycle>()?.SetBasementMusic(true);
+            interaction.player.DisableCamerasPermanently();
+        }
         return true;
     }
 }

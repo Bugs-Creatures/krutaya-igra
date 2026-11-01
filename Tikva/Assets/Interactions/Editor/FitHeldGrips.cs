@@ -13,7 +13,7 @@ public static class FitHeldGrips
         ("Плоскогубцы",Vector3.back,Vector3.up,.24f,new(-1,.12f,0),new(-.45f,.8f,.25f),new(0,0,-1),1),
         ("screwdriver",Vector3.forward,Vector3.up,.21f,new(-1,.12f,0),new(-.35f,.85f,.3f),new(0,0,-1),1),
         ("Лопата",Vector3.back,Vector3.up,.16f,new(-1,.15f,0),new(-.42f,.86f,.25f),Vector3.forward,.68f),
-        ("crowbar",Vector3.forward,Vector3.up,.22f,new(0,1,-.12f),new(-.35f,.9f,.25f),new(-1,0,0),.9f),
+        ("crowbar",Vector3.forward,Vector3.up,.22f,new(0,1,-.12f),new(-.35f,.9f,.25f),Vector3.back,.9f),
         ("vodka",Vector3.up,Vector3.back,.35f,new(-1,.12f,0),Vector3.up,Vector3.back,1),
         ("rope",Vector3.right,Vector3.up,.12f,Vector3.up,new(.95f,.2f,0),Vector3.back,1),
         ("Axe",Vector3.forward,Vector3.up,.18f,new(-1,.12f,0),new(-.25f,.96f,.08f),Vector3.left,1),

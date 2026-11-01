@@ -16,10 +16,12 @@ public sealed class BroadcastCycle : MonoBehaviour
     public AudioClip onAirMusic;
     public AudioClip advertisementMusic;
     public AudioClip breakAnnouncement;
+    public AudioClip basementMusic;
     [Header("Audio sources")]
     public AudioSource onAirSource;
     public AudioSource advertisementSource;
     public AudioSource announcerSource;
+    public AudioSource basementSource;
     [Range(0,1)] public float musicVolume=.45f;
     [Range(0,1)] public float announcerVolume=.9f;
     [Range(0,1)] public float announcerMusicDuck=.45f;
@@ -27,11 +29,13 @@ public sealed class BroadcastCycle : MonoBehaviour
     public BroadcastPhase Phase {get;private set;}=BroadcastPhase.OnAir;
     public bool HasStarted {get;private set;}
     public bool PermanentlyStopped=>Phase==BroadcastPhase.PermanentlyOff;
+    public bool IsOnAir=>!suspended&&Phase==BroadcastPhase.OnAir;
+    public bool InBasement {get;private set;}
     public float SecondsRemaining=>HasStarted&&!PermanentlyStopped?remaining:0;
     public int AdvertisementCount {get;private set;}
     public int AnnouncementCount {get;private set;}
     float remaining;
-    bool warned,suspended,airPaused,adPaused;
+    bool warned,suspended,airPaused,adPaused,basementPaused;
 
     void Awake()
     {
@@ -113,12 +117,18 @@ public sealed class BroadcastCycle : MonoBehaviour
         SyncMusic();
     }
     public void StopForEnding(){suspended=true;StopAnnouncement();}
+    public void SetBasementMusic(bool value)
+    {
+        if(InBasement==value)return;
+        InBasement=value;SyncMusic();
+    }
 
     void SyncMusic()
     {
         if(suspended)return;
-        // The soundtrack continues through breaks, blind zones and permanent off-air.
-        Resume(onAirSource,onAirMusic,ref airPaused);
+        // Broadcast state does not interrupt music; only the basement has its own track.
+        if(InBasement&&basementMusic&&basementSource)Resume(basementSource,basementMusic,ref basementPaused);
+        else Resume(onAirSource,onAirMusic,ref airPaused);
     }
     static void Resume(AudioSource source,AudioClip clip,ref bool paused)
     {
@@ -129,10 +139,12 @@ public sealed class BroadcastCycle : MonoBehaviour
     }
     void UpdateMusic(float seconds)
     {
-        bool air=!suspended;
+        bool basement=!suspended&&InBasement&&basementMusic&&basementSource;
+        bool air=!suspended&&!basement;
         float duck=announcerSource&&announcerSource.isPlaying?announcerMusicDuck:1;
         Fade(onAirSource,air?musicVolume*duck:0,seconds,!air,ref airPaused);
         Fade(advertisementSource,0,seconds,true,ref adPaused);
+        Fade(basementSource,basement?musicVolume:0,seconds,!basement,ref basementPaused);
     }
     void Fade(AudioSource source,float target,float seconds,bool pause,ref bool paused)
     {
@@ -145,5 +157,6 @@ public sealed class BroadcastCycle : MonoBehaviour
         if(interaction)interaction.CharacterInteracted-=FirstCharacterInteraction;
         if(player)player.CamerasPermanentlyDisabled-=StopPermanently;
         if(onAirSource)onAirSource.Stop();if(advertisementSource)advertisementSource.Stop();StopAnnouncement();
+        if(basementSource)basementSource.Stop();
     }
 }

@@ -28,7 +28,7 @@ public sealed class PlayerMapInventory : MonoBehaviour
         float target=closing?0:1;fade=Mathf.MoveTowards(fade,target,Time.unscaledDeltaTime*7);group.alpha=fade;panel.localScale=Vector3.one*Mathf.Lerp(.94f,1,Mathf.SmoothStep(0,1,fade));
         if(closing&&fade<=0){FinishClose();return;}
         bool hover=Mouse.current!=null&&GameHudUI.Hit(close,Mouse.current.position.ReadValue());interaction.prompt.SetInteractionCursor(hover);
-        close.GetComponent<TextMeshProUGUI>().color=hover?Color.yellow:Color.white;
+        close.GetComponent<TextMeshProUGUI>().color=hover?new Color(.2f,.2f,.2f):Color.black;
     }
     public void Open()
     {
@@ -49,9 +49,9 @@ public sealed class PlayerMapInventory : MonoBehaviour
         panel=GameHudUI.Rect("Map bounds",overlay.transform,new Vector2(820,540),Vector2.zero);
         var imageRect=GameHudUI.Rect("Map image",panel,new Vector2(820,540),Vector2.zero);var image=imageRect.gameObject.AddComponent<UnityEngine.UI.RawImage>();image.texture=MapImage;image.raycastTarget=false;
         var fit=imageRect.gameObject.AddComponent<UnityEngine.UI.AspectRatioFitter>();fit.aspectMode=UnityEngine.UI.AspectRatioFitter.AspectMode.FitInParent;fit.aspectRatio=MapImage?(float)MapImage.width/MapImage.height:1;
-        var closeLabel=GameHudUI.Text("Close",imageRect,interaction.prompt.font,"×",30,Color.white,new Vector2(40,40),new Vector2(-6,-6));
+        var closeLabel=GameHudUI.Text("Close",imageRect,interaction.prompt.font,"×",30,Color.black,new Vector2(40,40),new Vector2(-6,-6));
         close=closeLabel.rectTransform;close.anchorMin=close.anchorMax=Vector2.one;close.pivot=Vector2.one;
-        closeLabel.outlineColor=Color.black;closeLabel.outlineWidth=.15f;
+        closeLabel.outlineColor=Color.white;closeLabel.outlineWidth=.12f;
         group=overlay.AddComponent<CanvasGroup>();group.blocksRaycasts=false;
     }
     public void Close(){if(!IsOpen||closing)return;closing=true;buttons?.Dispose();buttons=null;}
