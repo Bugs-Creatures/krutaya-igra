@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum ToolActionKind { BreakChains, EnterBasement, RemovePanelCover, CutPanelWire }
+public enum ToolActionKind { BreakChains, EnterBasement, RemovePanelCover, CutPanelWire, ExitBasement, DigSoil }
 
 public sealed class ToolActionTarget : MonoBehaviour
 {
@@ -17,10 +17,30 @@ public sealed class ToolActionTarget : MonoBehaviour
     public Transform destination;
     public bool IsBroken {get;private set;}
     public bool IsUnlocked {get;private set;}
+    public bool IsDug {get;private set;}
     public string LastFailure {get;private set;}
     public bool TryUse(PlayerInteraction interaction)
     {
         LastFailure=null;
+        if(action==ToolActionKind.DigSoil)
+        {
+            var target=GetComponent<InteractionObject>();
+            if(target&&!interaction.InReach(target)){LastFailure=target.tooFarHoverText;return false;}
+            if(IsDug)return false;
+            if(!requiredTool||interaction.heldItem!=requiredTool)
+            {LastFailure=string.IsNullOrWhiteSpace(missingToolText)?"здесь что-то есть":missingToolText;return false;}
+            IsDug=true;
+            if(target&&target.Outline)target.Outline.Show(false,PlayerInteraction.AvailableOutlineColor);
+            gameObject.SetActive(false);
+            return true;
+        }
+        if(action==ToolActionKind.ExitBasement)
+        {
+            if(!destination){LastFailure="Точка выхода не назначена.";return false;}
+            interaction.player.TeleportFirstPerson(destination);
+            interaction.player.DisableCamerasPermanently();
+            return true;
+        }
         if(action==ToolActionKind.RemovePanelCover||action==ToolActionKind.CutPanelWire)
         {
             if(!electricalPanel)return false;
