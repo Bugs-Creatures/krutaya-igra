@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: QuestTools_Atlas
+    second: {fileID: 2100000, guid: 60064713bb92ff4469d9a7f345d4eb52, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: ShopProps2_Atlas
     second: {fileID: 2100000, guid: 829dd20122a568249a368d9535ad048e, type: 2}
   - first:

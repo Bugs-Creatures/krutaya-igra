@@ -49,7 +49,7 @@ public static class ItemsPlayCheck
             foreach(var n in new[]{"Ключ","Плоскогубцы","Лопата","vodka"})
             {
                 var it=Item(n);p.Teleport(it.transform.position+new Vector3(.9f,0,0)-Vector3.up*it.transform.position.y);
-                r[n+": under the cursor"]=Aimed(i,it,new Vector3(.8f,1.0f,.3f));
+                r[n+": under the cursor"]=Aimed(i,it,n=="Плоскогубцы"?new Vector3(-.7f,.5f,.15f):new Vector3(.8f,1.0f,.3f));   // the pliers on the panel: from in front of it
                 r[n+": still where it lay"]=it.transform.Find("Model")&&it.GetComponentInChildren<Collider>().bounds.min.y>-.01f;
             }
             foreach(var (n,from) in new[]{("screwdriver",new Vector3(.6f,.4f,.2f)),("crowbar",new Vector3(-.6f,.4f,.2f))})   // indoors, under a ceiling: from closer and lower

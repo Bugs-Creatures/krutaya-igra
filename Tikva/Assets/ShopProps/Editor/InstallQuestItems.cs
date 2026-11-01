@@ -20,12 +20,14 @@ public static class InstallQuestItems
         ("Лопата", "Item_Shovel", new Vector3(90, 0, 0)),                // lying, the blade face up
         ("Ключ", "Item_Key", Vector3.zero), ("Плоскогубцы", "Item_Cutters", Vector3.zero),
         ("Axe", "Item_Axe", new Vector3(90, 0, 0)),                     // the boss's reward, lying
+        ("screwdriver", "Item_Screwdriver", new Vector3(90, 0, 0)), ("crowbar", "Item_Crowbar", new Vector3(90, 0, 0)),   // lying, the claw flat
     };
     static readonly System.Collections.Generic.Dictionary<string,Vector3> Ground = new()   // footprint centre and bottom, where moved
     {
         ["Лопата"] = new Vector3(-1.0f, 0.0f, 8.95f),
         ["Ключ"] = new Vector3(-1.57f, 0.505f, 8.56f),                    // on the bench's seat, where the cubes were
-        ["Плоскогубцы"] = new Vector3(-1.57f, 0.505f, 9.14f),
+        ["Плоскогубцы"] = new Vector3(18.67f, 1.728f, -7.63f),             // on the electrical panel, where shitok put them
+        ["screwdriver"] = new Vector3(3.79f, 5.0f, 18.97f),                // on the coat cupboard
     };
 
     [MenuItem("Tools/Install quest item models")]

@@ -26,11 +26,11 @@ public static class InstallShopProps
     const float West = -20.875f, East = -7.135f, Back = -21.875f, Front = -12.095f, FloorY = .01f, CeilY = 3.12f;
     const float DoorX0 = -18.4f, DoorX1 = -16.6f, DoorTop = 2.2f;
 
-    // every model in Models onto the project's materials: the two atlases, glass, lamp tubes, the spirit in the vodka bottle
+    // every model in Models onto the project's materials: the atlases (props, props 2, quest tools), glass, lamp tubes, the spirit in the vodka bottle
     [MenuItem("Tools/Import shop models")]
     public static void ImportModels()
     {
-        var remap=new Dictionary<string,Material>{["ShopProps_Atlas"]=AtlasMaterial("ShopProps_Atlas"),["ShopProps2_Atlas"]=AtlasMaterial("ShopProps2_Atlas"),
+        var remap=new Dictionary<string,Material>{["ShopProps_Atlas"]=AtlasMaterial("ShopProps_Atlas"),["ShopProps2_Atlas"]=AtlasMaterial("ShopProps2_Atlas"),["QuestTools_Atlas"]=AtlasMaterial("QuestTools_Atlas"),
                                                  ["glass"]=GlassMaterial(),["glass_green"]=GlassMaterial(),["lamp_tube"]=TubeMaterial(),["vodka"]=SpiritMaterial()};
         foreach(var path in AssetDatabase.FindAssets("t:Model",new[]{Root+"Models"}).Select(AssetDatabase.GUIDToAssetPath))
         {
