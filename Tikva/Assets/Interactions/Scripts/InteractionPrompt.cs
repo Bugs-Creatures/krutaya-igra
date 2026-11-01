@@ -11,9 +11,16 @@ public sealed class InteractionPrompt : MonoBehaviour
     public Vector2 itemHotspot=new Vector2(11,2);
     [Min(0)] public float textHoldSeconds=.55f;
     [Min(.01f)] public float textFadeSeconds=.45f;
+    [Header("First person reticle")]
+    [Min(4)] public float reticleDiameter=8;
+    [Range(.5f,3)] public float reticleThickness=1;
+    public Color reticleColor=new Color(1,1,1,.85f);
     RectTransform canvasRect,tooltip;
     TextMeshProUGUI label;
-    UnityEngine.UI.Image reticle;
+    InteractionReticle reticle;
+    PlayerInteraction interaction;
+    InteractionObject aimedItem;
+    bool presentedFirstPerson;
     CanvasGroup tooltipGroup;
     float feedbackSeconds;
     bool handShown;
@@ -22,6 +29,8 @@ public sealed class InteractionPrompt : MonoBehaviour
     public bool HandShown=>handShown;
     public string VisibleText=>label&&tooltip.gameObject.activeSelf?label.text:"";
     public float VisibleFontSize=>label&&tooltip.gameObject.activeSelf?label.fontSize:0;
+    public bool IsReticleFilled=>reticle&&reticle.Filled;
+    public bool IsReticleVisible=>reticle&&reticle.enabled;
     void Awake()
     {
         var canvas=gameObject.GetComponent<Canvas>();if(!canvas)canvas=gameObject.AddComponent<Canvas>();
@@ -36,9 +45,10 @@ public sealed class InteractionPrompt : MonoBehaviour
         var text=new GameObject("Action",typeof(RectTransform));text.SetActive(false);text.transform.SetParent(panel.transform,false);
         label=text.AddComponent<TextMeshProUGUI>();label.font=font;label.fontSize=22;label.raycastTarget=false;label.textWrappingMode=TextWrappingModes.NoWrap;
         var rect=(RectTransform)text.transform;rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=new Vector2(10,5);rect.offsetMax=new Vector2(-10,-4);text.SetActive(true);
-        var dot=new GameObject("First person aim",typeof(RectTransform),typeof(UnityEngine.UI.Image));dot.transform.SetParent(transform,false);
-        reticle=dot.GetComponent<UnityEngine.UI.Image>();reticle.raycastTarget=false;reticle.color=new Color(1,1,1,.75f);
-        var dr=(RectTransform)dot.transform;dr.sizeDelta=new Vector2(3,3);dr.anchoredPosition=Vector2.zero;
+        var dot=new GameObject("First person aim",typeof(RectTransform),typeof(InteractionReticle));dot.transform.SetParent(transform,false);
+        reticle=dot.GetComponent<InteractionReticle>();reticle.raycastTarget=false;reticle.color=reticleColor;reticle.Thickness=reticleThickness;reticle.enabled=false;
+        var dr=(RectTransform)dot.transform;dr.sizeDelta=Vector2.one*reticleDiameter;dr.anchoredPosition=Vector2.zero;
+        interaction=Object.FindAnyObjectByType<PlayerInteraction>();
         UseDefaultCursor();
     }
     public void UseDefaultCursor()
@@ -61,7 +71,7 @@ public sealed class InteractionPrompt : MonoBehaviour
     public void Present(InteractionObject item,Vector2 screen,bool firstPerson)
     {
         if(!tooltip)return;
-        reticle.enabled=firstPerson;
+        aimedItem=item;presentedFirstPerson=firstPerson;UpdateReticle();
         bool hand=item && !firstPerson;
         SetInteractionCursor(hand);
         if(tooltip.gameObject.activeSelf)PlaceTooltip(screen);
@@ -98,9 +108,21 @@ public sealed class InteractionPrompt : MonoBehaviour
         tooltipGroup.alpha=Mathf.Clamp01(feedbackSeconds/Mathf.Max(.01f,textFadeSeconds));
         if(feedbackSeconds<=0)tooltip.gameObject.SetActive(false);
     }
+    void UpdateReticle()
+    {
+        if(!reticle)return;
+        var player=interaction?interaction.player:null;
+        bool unlocked=player&&!player.modalInputLocked&&!player.dialogueLocked&&!player.ShopReturning;
+        bool firstPerson=player?player.EffectiveFirstPerson:presentedFirstPerson;
+        reticle.enabled=firstPerson&&unlocked&&Cursor.lockState==CursorLockMode.Locked;
+        reticle.Filled=reticle.enabled&&aimedItem&&aimedItem.isActiveAndEnabled&&!aimedItem.IsHeld&&aimedItem.Allowed(true)&&interaction.InReach(aimedItem);
+        reticle.rectTransform.sizeDelta=Vector2.one*reticleDiameter;reticle.Thickness=reticleThickness;reticle.color=reticleColor;
+    }
+    void LateUpdate()=>UpdateReticle();
     void OnDisable()
     {
         ClearFeedback();
+        if(reticle)reticle.enabled=false;
         Cursor.SetCursor(null,Vector2.zero,CursorMode.Auto);Cursor.visible=true;handShown=false;
     }
     void OnDestroy()

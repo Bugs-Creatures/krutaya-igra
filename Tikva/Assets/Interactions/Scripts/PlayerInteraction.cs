@@ -26,6 +26,7 @@ public sealed class PlayerInteraction : MonoBehaviour
     InteractionObject motionItem;
     float bobPhase,bobWeight,bobWeightVelocity;
     bool cameraRotationReady,gripConfigured;
+    float configuredGripScale;
     void Awake()
     {
         if(!player)player=GetComponent<SurvivalPlayerController>();
@@ -55,13 +56,21 @@ public sealed class PlayerInteraction : MonoBehaviour
     {
         var hits=Physics.RaycastAll(ray,player.cameraRig.output.farClipPlane,aimLayers,QueryTriggerInteraction.Ignore);
         Array.Sort(hits,(a,b)=>a.distance.CompareTo(b.distance));
+        InteractionObject talk=null;
         foreach(var hit in hits)
         {
             if(hit.transform.IsChildOf(transform))continue;
             var item=hit.collider.GetComponentInParent<InteractionObject>();
-            return item && item.isActiveAndEnabled && !item.IsHeld?item:null;
+            if(item&&item.isActiveAndEnabled&&!item.IsHeld)
+            {
+                // NPC interaction boxes encompass empty space too. A pickup behind that box
+                // must remain selectable; solid scenery still stops the ray below.
+                if(item.kind==InteractionKind.Talk){if(!talk)talk=item;continue;}
+                return item;
+            }
+            return talk;
         }
-        return null;
+        return talk;
     }
     public bool TryInteract(InteractionObject item)
     {
@@ -132,11 +141,12 @@ public sealed class PlayerInteraction : MonoBehaviour
         var anchor=AnchorForMode(firstPerson);if(!anchor)return;
         var position=firstPerson?heldItem.firstPersonHeldPosition:heldItem.thirdPersonHeldPosition;
         var euler=firstPerson?heldItem.firstPersonHeldRotation:heldItem.thirdPersonHeldRotation;
-        bool changed=heldItem.transform.parent!=anchor||!gripConfigured||configuredGripPosition!=position||configuredGripRotation!=euler;
+        float scale=firstPerson?heldItem.firstPersonHeldScale:1;
+        bool changed=heldItem.transform.parent!=anchor||!gripConfigured||configuredGripPosition!=position||configuredGripRotation!=euler||configuredGripScale!=scale;
         if(changed)
         {
             heldItem.SetGrip(anchor,firstPerson);
-            configuredGripPosition=position;configuredGripRotation=euler;gripConfigured=true;
+            configuredGripPosition=position;configuredGripRotation=euler;configuredGripScale=scale;gripConfigured=true;
             ResetHeldMotion();
         }
         else if(!firstPerson)
@@ -179,7 +189,8 @@ public sealed class PlayerInteraction : MonoBehaviour
         motionPosition=Vector3.SmoothDamp(motionPosition,targetPosition,ref motionPositionVelocity,motionSmoothTime,Mathf.Infinity,dt);
         motionRotation=Vector3.SmoothDamp(motionRotation,targetRotation,ref motionRotationVelocity,motionSmoothTime,Mathf.Infinity,dt);
         heldItem.transform.localPosition=configuredGripPosition+motionPosition;
-        heldItem.transform.localRotation=Quaternion.Euler(configuredGripRotation)*Quaternion.Euler(motionRotation);
+        // Sway uses the camera anchor's axes, independently of each model's authored grip rotation.
+        heldItem.transform.localRotation=Quaternion.Euler(motionRotation)*Quaternion.Euler(configuredGripRotation);
     }
     void SetHovered(InteractionObject next)
     {

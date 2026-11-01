@@ -50,7 +50,7 @@ public static class DrunkPlayCheck
                 r["with vodka: choice offered, player held"]=d.Choosing&&p.dialogueLocked;
                 typeof(DrunkDialogue).GetMethod("Choose",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(d,new object[]{true});
                 r["vodka left the player's hands"]=i.heldItem==null&&p.currentHeldItem=="";
-                r["bottle in his right hand"]=vodka.IsHeld&&vodka.transform.parent==DrunkDialogue.RightHand(d);
+                r["bottle in his right hand"]=vodka.IsHeld&&vodka.transform.IsChildOf(DrunkDialogue.RightHand(d));   // on the hand or on its VodkaGrip
                 r["given, player free again"]=d.given&&!d.Choosing&&!p.dialogueLocked;
                 r["reward appeared"]=reward.gameObject.activeSelf;
                 rewardStart=reward.transform.position;stage=1;waitUntil=Time.realtimeSinceStartup+3;return;

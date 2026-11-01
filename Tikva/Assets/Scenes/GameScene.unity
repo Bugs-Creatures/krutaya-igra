@@ -24477,6 +24477,9 @@ MonoBehaviour:
   given: 0
   lettersPerSecond: 35
   rewardThrow: 1.2
+  bottleGrip: {fileID: 496402193}
+  bottleLocalPosition: {x: -0.056418214, y: 0.020810181, z: 0.05}
+  bottleLocalRotation: {x: -0.0000016025992, y: 180, z: 276.84277}
 --- !u!114 &197155594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24519,6 +24522,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -63234,6 +63238,37 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -8678823145569952518, guid: 55c1aaf2dc03c8240bfcc803f5102608, type: 3}
+--- !u!1 &496402192
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 496402193}
+  m_Layer: 0
+  m_Name: VodkaGrip
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &496402193
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 496402192}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.09, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3129580989458282446}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &496987783
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -73103,10 +73138,11 @@ MonoBehaviour:
   openedDoorHoverText: "\u0437\u0430\u043A\u0440\u044B\u0442\u044C"
   tooFarHoverText: "\u0432\u044B \u0434\u0430\u043B\u0435\u043A\u043E"
   hoverTextSize: 14
-  thirdPersonHeldPosition: {x: -0.029131252, y: 0.08221288, z: -0.000000015330514}
-  thirdPersonHeldRotation: {x: 289.29004, y: 89.999985, z: 90.000015}
-  firstPersonHeldPosition: {x: -0.00000044982, y: -0.00000014670977, z: -0.00000006110667}
-  firstPersonHeldRotation: {x: 16.224361, y: 261.63412, z: 19.563803}
+  thirdPersonHeldPosition: {x: -0.051465623, y: 0.020215381, z: 0.024999984}
+  thirdPersonHeldRotation: {x: 83.15728, y: 270, z: 270}
+  firstPersonHeldPosition: {x: -0.16226731, y: 0.19445539, z: -0.42}
+  firstPersonHeldRotation: {x: 315, y: 90, z: 282.27463}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -87749,10 +87785,11 @@ MonoBehaviour:
   openedDoorHoverText: "\u0437\u0430\u043A\u0440\u044B\u0442\u044C"
   tooFarHoverText: "\u0432\u044B \u0434\u0430\u043B\u0435\u043A\u043E"
   hoverTextSize: 14
-  thirdPersonHeldPosition: {x: -0.038841885, y: 0.08561108, z: 0.00000006132163}
-  thirdPersonHeldRotation: {x: 19.290047, y: 90, z: 90}
-  firstPersonHeldPosition: {x: -0.000000009890708, y: 0.000000055725693, z: -0.000000018695856}
-  firstPersonHeldRotation: {x: 16.392529, y: 168.69006, z: 347.04236}
+  thirdPersonHeldPosition: {x: -0.08963065, y: 0.024795678, z: 0.025000062}
+  thirdPersonHeldRotation: {x: 6.842775, y: 90, z: 90}
+  firstPersonHeldPosition: {x: -0.030363858, y: 0.12700428, z: -0.17000026}
+  firstPersonHeldRotation: {x: 57.23966, y: 119.05461, z: 295.0415}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -103715,6 +103752,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -108793,6 +108831,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -114940,6 +114979,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -116419,10 +116459,11 @@ MonoBehaviour:
   openedDoorHoverText: "\u0437\u0430\u043A\u0440\u044B\u0442\u044C"
   tooFarHoverText: "\u0432\u044B \u0434\u0430\u043B\u0435\u043A\u043E"
   hoverTextSize: 14
-  thirdPersonHeldPosition: {x: -0.07641735, y: 0.04144949, z: -0.00000003066071}
-  thirdPersonHeldRotation: {x: 21.801409, y: 270, z: 270}
-  firstPersonHeldPosition: {x: -0.0040824735, y: 0.028577104, z: 0.040824436}
-  firstPersonHeldRotation: {x: 325.14178, y: 354.2894, z: 273.27118}
+  thirdPersonHeldPosition: {x: -0.11321929, y: 0.027626317, z: 0.024999963}
+  thirdPersonHeldRotation: {x: 353.15723, y: 270, z: 270}
+  firstPersonHeldPosition: {x: 0.01184544, y: 0.10541959, z: -0.09000045}
+  firstPersonHeldRotation: {x: 299.95148, y: 319.3987, z: 306.60016}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -118652,10 +118693,11 @@ MonoBehaviour:
   openedDoorHoverText: "\u0437\u0430\u043A\u0440\u044B\u0442\u044C"
   tooFarHoverText: "\u0432\u044B \u0434\u0430\u043B\u0435\u043A\u043E"
   hoverTextSize: 14
-  thirdPersonHeldPosition: {x: -0.1942099, y: 0.13998988, z: 7.310107e-14}
-  thirdPersonHeldRotation: {x: 19.290047, y: 90, z: 90}
-  firstPersonHeldPosition: {x: -0.046574753, y: 0.055889707, z: 0.18629901}
-  firstPersonHeldRotation: {x: 16.227257, y: 165.96376, z: 89.23761}
+  thirdPersonHeldPosition: {x: -0.18883958, y: 0.036700755, z: 0.02499999}
+  thirdPersonHeldRotation: {x: 353.15723, y: 270, z: 270}
+  firstPersonHeldPosition: {x: 0.24399614, y: -0.013293773, z: 0.34999925}
+  firstPersonHeldRotation: {x: 295.54346, y: 305.5377, z: 141.6326}
+  firstPersonHeldScale: 0.9
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -124474,6 +124516,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 14869400}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -128365,10 +128408,11 @@ MonoBehaviour:
   openedDoorHoverText: "\u0437\u0430\u043A\u0440\u044B\u0442\u044C"
   tooFarHoverText: "\u0432\u044B \u0434\u0430\u043B\u0435\u043A\u043E"
   hoverTextSize: 14
-  thirdPersonHeldPosition: {x: -0.0582619, y: 0.0924081, z: 0.00000049057303}
-  thirdPersonHeldRotation: {x: 340.70996, y: 270, z: 270}
-  firstPersonHeldPosition: {x: -0.006889472, y: 0.009645765, z: 0.027557887}
-  firstPersonHeldRotation: {x: 341.2451, y: 345.96375, z: 0}
+  thirdPersonHeldPosition: {x: -0.07767224, y: 0.02336067, z: 0.025000487}
+  thirdPersonHeldRotation: {x: 353.15723, y: 270, z: 270}
+  firstPersonHeldPosition: {x: -0.09367742, y: 0.15937994, z: -0.29000086}
+  firstPersonHeldRotation: {x: 298.47214, y: 310.6013, z: 53.003048}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -133344,10 +133388,11 @@ MonoBehaviour:
   openedDoorHoverText: "\u0437\u0430\u043A\u0440\u044B\u0442\u044C"
   tooFarHoverText: "\u0432\u044B \u0434\u0430\u043B\u0435\u043A\u043E"
   hoverTextSize: 14
-  thirdPersonHeldPosition: {x: 0, y: 0.072016306, z: 0}
-  thirdPersonHeldRotation: {x: -0, y: 90, z: 180}
-  firstPersonHeldPosition: {x: 0, y: 0, z: 0}
-  firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  thirdPersonHeldPosition: {x: -0.056418214, y: 0.020810181, z: 0.024999999}
+  thirdPersonHeldRotation: {x: -0.0000016025992, y: 180, z: 276.84277}
+  firstPersonHeldPosition: {x: -0.009259284, y: 0.11621231, z: -0.13000023}
+  firstPersonHeldRotation: {x: -0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -139239,10 +139284,11 @@ MonoBehaviour:
   openedDoorHoverText: "\u0437\u0430\u043A\u0440\u044B\u0442\u044C"
   tooFarHoverText: "\u0432\u044B \u0434\u0430\u043B\u0435\u043A\u043E"
   hoverTextSize: 14
-  thirdPersonHeldPosition: {x: -0.39698726, y: 0.3102088, z: 0.00000009006613}
-  thirdPersonHeldRotation: {x: 30.963755, y: 90, z: 90}
-  firstPersonHeldPosition: {x: -0.097806744, y: -0.08150554, z: 0.3260225}
-  firstPersonHeldRotation: {x: 346.53372, y: 163.30075, z: 3.23391}
+  thirdPersonHeldPosition: {x: -0.54279846, y: 0.095219806, z: 0.025000123}
+  thirdPersonHeldRotation: {x: 8.530769, y: 90, z: 90}
+  firstPersonHeldPosition: {x: 0.060000002, y: -0.06999999, z: -0.119999945}
+  firstPersonHeldRotation: {x: 60.38864, y: 120.76272, z: 117.36147}
+  firstPersonHeldScale: 0.68
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -147713,6 +147759,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -174194,10 +174241,11 @@ MonoBehaviour:
   openedDoorHoverText: "\u0437\u0430\u043A\u0440\u044B\u0442\u044C"
   tooFarHoverText: "\u0432\u044B \u0434\u0430\u043B\u0435\u043A\u043E"
   hoverTextSize: 14
-  thirdPersonHeldPosition: {x: -0.19420944, y: 0.13998972, z: -0.00000012264326}
-  thirdPersonHeldRotation: {x: 340.70996, y: 270, z: 270}
-  firstPersonHeldPosition: {x: -0.04522168, y: 0.0723545, z: 0.18088622}
-  firstPersonHeldRotation: {x: 338.7909, y: 345.96375, z: 270.98694}
+  thirdPersonHeldPosition: {x: -0.20771934, y: 0.038966328, z: 0.024999866}
+  thirdPersonHeldRotation: {x: 353.15723, y: 270, z: 270}
+  firstPersonHeldPosition: {x: -0.059999883, y: 0.040000036, z: -0.18}
+  firstPersonHeldRotation: {x: 285.29233, y: 287.7447, z: 161.64693}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -174989,6 +175037,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -198335,7 +198384,7 @@ Transform:
   m_GameObject: {fileID: 1579191864}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: 18.696, y: 1.323, z: -7.547}
+  m_LocalPosition: {x: 18.696, y: 1.044, z: -7.547}
   m_LocalScale: {x: 14.550007, y: 29.1, z: 29.1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -207040,6 +207089,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -209398,6 +209448,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -218235,6 +218286,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -224447,6 +224499,9 @@ MonoBehaviour:
   itemHotspot: {x: 8, y: 4}
   textHoldSeconds: 0.55
   textFadeSeconds: 0.45
+  reticleDiameter: 8
+  reticleThickness: 1
+  reticleColor: {r: 1, g: 1, b: 1, a: 0.85}
 --- !u!223 &1761698810
 Canvas:
   m_ObjectHideFlags: 0
@@ -235627,10 +235682,11 @@ MonoBehaviour:
   openedDoorHoverText: "\u0437\u0430\u043A\u0440\u044B\u0442\u044C"
   tooFarHoverText: "\u0432\u044B \u0434\u0430\u043B\u0435\u043A\u043E"
   hoverTextSize: 22
-  thirdPersonHeldPosition: {x: 0.00000024528654, y: 0.07201642, z: -0.000000007665263}
+  thirdPersonHeldPosition: {x: -0.007999788, y: 0.15387744, z: 0.024999993}
   thirdPersonHeldRotation: {x: -0, y: 90, z: 90}
-  firstPersonHeldPosition: {x: -0.000000007450581, y: 0.0000002262227, z: 0.00000007564542}
-  firstPersonHeldRotation: {x: 286.69922, y: 0, z: 0}
+  firstPersonHeldPosition: {x: -0.11478235, y: 0.170173, z: -0.33000007}
+  firstPersonHeldRotation: {x: 281.8886, y: 270, z: 90}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -273551,6 +273607,7 @@ MonoBehaviour:
   thirdPersonHeldRotation: {x: 0, y: 0, z: 90}
   firstPersonHeldPosition: {x: 0, y: 0, z: 0}
   firstPersonHeldRotation: {x: 0, y: 0, z: 0}
+  firstPersonHeldScale: 1
   hinge: {fileID: 0}
   hingeAxis: {x: 0, y: 1, z: 0}
   openAngle: 90
@@ -273670,6 +273727,7 @@ GameObject:
   - component: {fileID: 197155594}
   - component: {fileID: 197155593}
   - component: {fileID: 197155597}
+  - component: {fileID: 919132149352588887}
   m_Layer: 0
   m_Name: drunk
   m_TagString: Untagged
@@ -273677,6 +273735,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &919132149352588887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919132149352588886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4a9290d8d9ac6f428a1620c6e298a8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HeldItemHandPose
+  interaction: {fileID: 0}
+  handBone: {fileID: 0}
+  externalHeldItem: {fileID: 1062073894}
+  blendTime: 0.12
+  gripStrength: 1
 --- !u!4 &928480781293098258
 Transform:
   m_ObjectHideFlags: 0
@@ -275025,6 +275100,8 @@ GameObject:
   - component: {fileID: 1790034895847241108}
   - component: {fileID: 1790034895847241107}
   - component: {fileID: 1790034895847241110}
+  - component: {fileID: 1790034895847241111}
+  - component: {fileID: 1790034895847241112}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -275308,6 +275385,36 @@ MonoBehaviour:
   rope: {fileID: 1837766908}
   hook: {fileID: 940713275}
   resultPrefab: {fileID: 3300768334608206741, guid: f886c20f9661d4e4eb16dbb588867ec3, type: 3}
+--- !u!114 &1790034895847241111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1790034895847241100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4a9290d8d9ac6f428a1620c6e298a8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HeldItemHandPose
+  interaction: {fileID: 1790034895847241104}
+  handBone: {fileID: 0}
+  externalHeldItem: {fileID: 0}
+  blendTime: 0.12
+  gripStrength: 1
+--- !u!114 &1790034895847241112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1790034895847241100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e62b9bda73abf524489377098f8bc52e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FirstPersonHeldItemRenderer
+  interaction: {fileID: 1790034895847241104}
 --- !u!4 &1793932669461611753
 Transform:
   m_ObjectHideFlags: 0
@@ -276956,6 +277063,7 @@ Transform:
   - {fileID: 2475047434453549166}
   - {fileID: 5500965677691645706}
   - {fileID: 5179487748730133752}
+  - {fileID: 496402193}
   m_Father: {fileID: 1245372252379315630}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3142332935537086484

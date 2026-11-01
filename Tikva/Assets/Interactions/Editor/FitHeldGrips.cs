@@ -3,70 +3,102 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// How each item sits in the hand, from the shape of its model: the long axis of the mesh, its working end
-// (the narrow end of a key, a screwdriver or the cutters, the wide end of a shovel, a crowbar or the hook)
-// and its flat side. First person (the anchor before the camera, low right: x right, y up, z ahead): tools
-// point ahead and a little up and left, the shovel's blade ahead and down, the bottle stands, the coil faces
-// the eye. Third person (the right hand bone, its y along the fingers, its -x the way the player faces):
-// tools stick out ahead and a little down from the fist, the bottle stands, the coil hangs. Safe to run again.
 public static class FitHeldGrips
 {
-    enum End { Narrow, Wide }
-    // item, working end, first person: end towards, flat side towards, shift; third person: end towards, flat side towards, shift
-    static readonly (string item, End end, Vector3 fpEnd, Vector3 fpFlat, float fpShift, Vector3 tpEnd, Vector3 tpFlat, float tpShift)[] Grips =
-    {
-        ("Ключ", End.Narrow, new(-.25f,.35f,1), new(0,.5f,-1), 0, new(-1,.35f,0), new(0,0,1), .03f),
-        ("Плоскогубцы", End.Narrow, new(-.2f,.3f,1), new(0,.6f,-1), 0, new(-1,.35f,0), new(0,0,1), .04f),
-        ("screwdriver", End.Narrow, new(-.25f,.35f,1), new(0,1,0), .03f, new(-1,.35f,0), new(0,0,1), .06f),
-        ("Лопата", End.Wide, new(-.3f,-.25f,1), new(0,1,.2f), .35f, new(-1,.6f,0), new(0,0,1), .45f),
-        ("crowbar", End.Wide, new(-.25f,.3f,1), new(1,0,.2f), .2f, new(-1,.35f,0), new(0,0,1), .2f),
-        ("vodka", End.Narrow, Vector3.zero, Vector3.zero, 0, new(0,-1,0), new(0,0,1), 0),   // first person: as it was, upright, the label to the eye
-        ("rope", End.Wide, new(1,0,0), new(.2f,.3f,-1), 0, new(0,1,0), new(0,0,1), 0),
-        ("Axe", End.Wide, new(-.25f,.4f,1), new(1,0,.2f), .2f, new(-1,.35f,0), new(0,0,1), .2f),
-        ("GrapplingHook", End.Wide, new(-.1f,.7f,1), new(1,0,0), .05f, new(-1,-.4f,0), new(0,0,1), .08f),
+    // Model-space working axis, fraction from the butt to the grip, and independent presentation axes. The
+    // pliers (end-cutting nippers, head along -Z), the screwdriver (tip along +Z) and the crowbar (hook along +Z)
+    // are the textured QuestTools models.
+    static readonly (string name,Vector3 axis,Vector3 flat,float grip,Vector3 tp,Vector3 fp,Vector3 fpFlat,float fpScale)[] Poses={
+        ("Ключ",Vector3.left,Vector3.up,.17f,new(-1,.12f,0),new(-.65f,.65f,.2f),new(0,0,-1),1),
+        ("Плоскогубцы",Vector3.back,Vector3.up,.24f,new(-1,.12f,0),new(-.45f,.8f,.25f),new(0,0,-1),1),
+        ("screwdriver",Vector3.forward,Vector3.up,.21f,new(-1,.12f,0),new(-.35f,.85f,.3f),new(0,0,-1),1),
+        ("Лопата",Vector3.back,Vector3.up,.16f,new(-1,.15f,0),new(-.42f,.86f,.25f),Vector3.forward,.68f),
+        ("crowbar",Vector3.forward,Vector3.up,.22f,new(-1,.12f,0),new(-.35f,.9f,.25f),new(-1,0,0),.9f),
+        ("vodka",Vector3.up,Vector3.back,.35f,new(-1,.12f,0),Vector3.up,Vector3.back,1),
+        ("rope",Vector3.right,Vector3.up,.12f,Vector3.up,new(.95f,.2f,0),Vector3.back,1),
+        ("Axe",Vector3.forward,Vector3.up,.18f,new(-1,.12f,0),new(-.25f,.96f,.08f),Vector3.left,1),
+        ("GrapplingHook",Vector3.forward,Vector3.up,.2f,new(-1,.12f,0),new(-.3f,.8f,.35f),new(1,0,0),1),
+        ("RopeGrapplingHook",Vector3.forward,Vector3.up,.18f,new(-1,.12f,0),new(-.3f,.8f,.35f),new(1,0,0),.85f)
     };
     const string Crafted="Assets/Interactions/RopeGrapplingHook.prefab";
-
+    public static void ApplyItems(string[] names)
+    {
+        if(EditorApplication.isPlaying)throw new System.InvalidOperationException("Exit Play Mode first.");
+        var interaction=Object.FindAnyObjectByType<PlayerInteraction>();
+        var items=Object.FindObjectsByType<InteractionObject>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+        foreach(var item in items.Where(i=>names.Contains(i.name)))
+        {
+            Undo.RecordObject(item,"Adjust held presentation");
+            Fit(item,interaction.rightHand,interaction.firstPersonAnchor);EditorUtility.SetDirty(item);
+        }
+        EditorSceneManager.MarkSceneDirty(interaction.gameObject.scene);EditorSceneManager.SaveScene(interaction.gameObject.scene);
+    }
+    public static Vector3[] ModelPoints(InteractionObject item)
+    {
+        var root=item.transform;var scale=root.lossyScale;
+        return item.GetComponentsInChildren<MeshFilter>(true).Where(f=>f.sharedMesh&&f.name!="Interaction outline")
+            .SelectMany(f=>f.sharedMesh.vertices.Select(v=>Vector3.Scale(root.InverseTransformPoint(f.transform.TransformPoint(v)),scale))).ToArray();
+    }
+    static void CentreMisplacedPivot(InteractionObject item)
+    {
+        var points=ModelPoints(item);if(points.Length==0)return;
+        var centre=(points.Aggregate(Vector3.Min)+points.Aggregate(Vector3.Max))/2;
+        if(centre.magnitude<2)return;
+        var root=item.transform;var children=root.Cast<Transform>().ToArray();
+        var positions=children.Select(t=>t.position).ToArray();
+        var colliders=root.GetComponents<BoxCollider>();var centres=colliders.Select(c=>root.TransformPoint(c.center)).ToArray();
+        Undo.RecordObjects(new Object[]{root}.Concat(children).Concat(colliders).ToArray(),"Centre item pivot");
+        root.position+=root.rotation*centre;
+        for(int n=0;n<children.Length;n++)children[n].position=positions[n];
+        for(int n=0;n<colliders.Length;n++)colliders[n].center=root.InverseTransformPoint(centres[n]);
+    }
     [MenuItem("Tools/Fit held grips")]
     public static void Apply()
     {
-        if(!Application.isBatchMode&&!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())return;
-        var scene=EditorSceneManager.OpenScene("Assets/Scenes/GameScene.unity");
-        var hand=Object.FindAnyObjectByType<PlayerInteraction>().rightHand;
+        if(EditorApplication.isPlaying)throw new System.InvalidOperationException("Exit Play Mode first.");
+        var interaction=Object.FindAnyObjectByType<PlayerInteraction>();var hand=interaction.rightHand;
+        var handPose=interaction.GetComponent<HeldItemHandPose>();
+        if(!handPose)handPose=interaction.gameObject.AddComponent<HeldItemHandPose>();
+        handPose.interaction=interaction;EditorUtility.SetDirty(handPose);
         var items=Object.FindObjectsByType<InteractionObject>(FindObjectsInactive.Include,FindObjectsSortMode.None);
-        foreach(var g in Grips)
+        foreach(var item in items.Where(i=>i.kind==InteractionKind.Pickup&&!i.GetComponent<MapItem>()))
         {
-            var item=items.FirstOrDefault(i=>i.name==g.item);
-            if(!item){Debug.LogWarning("HELDGRIPS no "+g.item);continue;}
-            Fit(item,g,hand.lossyScale.x);EditorUtility.SetDirty(item);
+            CentreMisplacedPivot(item);Fit(item,hand,interaction.firstPersonAnchor);EditorUtility.SetDirty(item);
         }
-        var root=PrefabUtility.LoadPrefabContents(Crafted);   // the rope-and-hook as the hook
-        Fit(root.GetComponent<InteractionObject>(),Grips.First(g=>g.item=="GrapplingHook"),hand.lossyScale.x);
-        PrefabUtility.SaveAsPrefabAsset(root,Crafted);PrefabUtility.UnloadPrefabContents(root);
-        EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
+        var root=PrefabUtility.LoadPrefabContents(Crafted);
+        try{Fit(root.GetComponent<InteractionObject>(),hand,interaction.firstPersonAnchor);PrefabUtility.SaveAsPrefabAsset(root,Crafted);}
+        finally{PrefabUtility.UnloadPrefabContents(root);}
+        EditorSceneManager.MarkSceneDirty(interaction.gameObject.scene);EditorSceneManager.SaveScene(interaction.gameObject.scene);
     }
-
-    static void Fit(InteractionObject item,(string item,End end,Vector3 fpEnd,Vector3 fpFlat,float fpShift,Vector3 tpEnd,Vector3 tpFlat,float tpShift) g,float handScale)
+    static void Fit(InteractionObject item,Transform hand,Transform fpAnchor)
     {
-        // the model's vertices in the item's own space, at world size
-        var t=item.transform;var s=t.lossyScale;
-        var pts=item.GetComponentsInChildren<MeshFilter>(true).Where(f=>f.sharedMesh).SelectMany(f=>f.sharedMesh.vertices.Select(v=>Vector3.Scale(t.InverseTransformPoint(f.transform.TransformPoint(v)),s))).ToArray();
-        Vector3 lo=pts.Aggregate(Vector3.Min),hi=pts.Aggregate(Vector3.Max),size=hi-lo,centre=(lo+hi)/2;
-        int longAxis=size.x>=size.y&&size.x>=size.z?0:size.y>=size.z?1:2;
-        int flatAxis=Enumerable.Range(0,3).Where(a=>a!=longAxis).OrderBy(a=>size[a]).First();
-        // how wide each end is, across the long axis: the last sixth of the length at either end
-        float Width(float from,float to)=>pts.Where(p=>p[longAxis]>=from&&p[longAxis]<=to)
-            .Select(p=>Enumerable.Range(0,3).Where(a=>a!=longAxis).Max(a=>Mathf.Abs(p[a]-centre[a]))).DefaultIfEmpty(0).Max();
-        float l6=size[longAxis]/6;
-        bool highIsWide=Width(hi[longAxis]-l6,hi[longAxis])>Width(lo[longAxis],lo[longAxis]+l6);
-        var along=Vector3.zero;along[longAxis]=(highIsWide==(g.end==End.Wide))?1:-1;
-        var flat=Vector3.zero;flat[flatAxis]=1;
-        Quaternion Turn(Vector3 end,Vector3 side)=>Quaternion.LookRotation(end.normalized,side)*Quaternion.Inverse(Quaternion.LookRotation(along,flat));
-        var fp=g.fpEnd!=Vector3.zero?Turn(g.fpEnd,g.fpFlat):Quaternion.identity;var tp=Turn(g.tpEnd,g.tpFlat);
-        // the middle of the model at the anchor, moved towards the working end by the shift
-        if(g.fpEnd!=Vector3.zero){item.firstPersonHeldRotation=fp.eulerAngles;item.firstPersonHeldPosition=g.fpEnd.normalized*g.fpShift-fp*centre;}
+        var g=Poses.FirstOrDefault(g=>g.name==item.name);
+        if(g.name==null)throw new System.InvalidOperationException("Missing held pose for "+item.name);
+        var pts=ModelPoints(item);var lo=pts.Aggregate(Vector3.Min);var hi=pts.Aggregate(Vector3.Max);var centre=(lo+hi)/2;
+        float min=pts.Min(p=>Vector3.Dot(p,g.axis)),max=pts.Max(p=>Vector3.Dot(p,g.axis));
+        var grip=centre+g.axis*(Mathf.Lerp(min,max,g.grip)-Vector3.Dot(centre,g.axis));
+        Quaternion Rotation(Vector3 end,Vector3 face)=>Quaternion.LookRotation(end,face)*Quaternion.Inverse(Quaternion.LookRotation(g.axis,g.flat));
+        var tp=Rotation(g.tp,Vector3.forward);var fp=Rotation(g.fp,g.fpFlat);
+        var handScale=hand.lossyScale;
         item.thirdPersonHeldRotation=tp.eulerAngles;
-        item.thirdPersonHeldPosition=(Vector3.up*.07f+g.tpEnd.normalized*g.tpShift-tp*centre)/handScale;   // into the palm, along the fingers
-        Debug.Log($"HELDGRIPS {item.name}: long axis {longAxis} flat {flatAxis} working end {(along[longAxis]>0?"+":"-")} size {size} fp {item.firstPersonHeldRotation} tp {item.thirdPersonHeldRotation}");
+        item.thirdPersonHeldPosition=new Vector3(-.008f,.015f,.025f)-new Vector3((tp*grip).x/handScale.x,(tp*grip).y/handScale.y,(tp*grip).z/handScale.z);
+        item.firstPersonHeldRotation=fp.eulerAngles;item.firstPersonHeldScale=g.fpScale;
+        var rotated=pts.Select(p=>fp*(p-centre)*g.fpScale).ToArray();
+        float tan=Mathf.Tan(34*Mathf.Deg2Rad),aspect=16f/9;Vector3 displayCentre=Vector3.zero;
+        for(float distance=.28f;distance<2;distance+=.01f)
+        {
+            displayCentre=new Vector3(.44f*tan*aspect*distance,-.4f*tan*distance,distance);
+            bool Fits(Vector3 point)
+            {
+                var v=point+displayCentre;if(v.z<.12f)return false;
+                float x=.5f+v.x/(2*tan*aspect*v.z),y=.5f+v.y/(2*tan*v.z);
+                return x>=.50f&&x<=.92f&&y>=.07f&&y<=.75f;
+            }
+            if(rotated.All(Fits))break;
+        }
+        // Long tools intentionally extend below the view: show their working heads close to the eye.
+        if(item.name=="Axe")displayCentre=new Vector3(.25f,-.23f,.52f);
+        if(item.name=="Лопата")displayCentre=new Vector3(.37f,-.34f,.58f);
+        item.firstPersonHeldPosition=displayCentre-fp*centre*g.fpScale-fpAnchor.localPosition;
     }
 }
