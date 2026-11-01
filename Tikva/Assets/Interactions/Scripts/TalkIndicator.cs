@@ -29,6 +29,7 @@ public sealed class TalkIndicator : MonoBehaviour
     }
     void LateUpdate()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!player||!rect)return;
         var camera=player.player.cameraRig.output;
         Vector3 position=head?head.position:transform.position+Vector3.up*1.8f;

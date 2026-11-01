@@ -39,7 +39,7 @@ public sealed class PlayerTutorialHud : MonoBehaviour
     {
         if(id=="movement")return;
         if(!known.Add(id))return;
-        if(showing&&!closing){pages.Add(id);RefreshCounter();}else {pending.Add(id);queuedAt=Time.unscaledTime;}
+        if(showing&&!closing){pages.Add(id);RefreshCounter();}else {pending.Add(id);queuedAt=PauseMenu.GameplayUnscaledTime;}
     }
     public void MapCollected()
     {
@@ -60,12 +60,13 @@ public sealed class PlayerTutorialHud : MonoBehaviour
     }
     void Update()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!player)return;
         bool enteredManualFirstPerson=player.firstPerson&&!wasManualFirstPerson;
         wasManualFirstPerson=player.firstPerson;
         if(map.HasMap&&!map.HasOpenedMap&&player.EffectiveFirstPerson)QueueHint("map");
         if(enteredManualFirstPerson&&!known.Contains("dropped")&&HasDroppedItems())QueueHint("dropped");
-        if(!showing&&pending.Count>0&&!player.modalInputLocked&&!player.dialogueLocked&&!player.ShopReturning&&player.dialogueClickFrame!=Time.frameCount&&Time.unscaledTime-queuedAt>=.2f)OpenHints();
+        if(!showing&&pending.Count>0&&!player.modalInputLocked&&!player.dialogueLocked&&!player.ShopReturning&&player.dialogueClickFrame!=Time.frameCount&&PauseMenu.GameplayUnscaledTime-queuedAt>=.2f)OpenHints();
 
         if(!showing)return;
         popupFade=Mathf.MoveTowards(popupFade,closing?0:1,Time.unscaledDeltaTime*7);popupGroup.alpha=popupFade;card.localScale=Vector3.one*Mathf.Lerp(.94f,1,Mathf.SmoothStep(0,1,popupFade));

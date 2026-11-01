@@ -103,6 +103,7 @@ public sealed class InteractionPrompt : MonoBehaviour
     }
     void Update()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!tooltip||!tooltip.gameObject.activeSelf)return;
         feedbackSeconds=Mathf.Max(0,feedbackSeconds-Time.unscaledDeltaTime);
         tooltipGroup.alpha=Mathf.Clamp01(feedbackSeconds/Mathf.Max(.01f,textFadeSeconds));

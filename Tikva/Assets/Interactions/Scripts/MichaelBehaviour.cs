@@ -23,6 +23,7 @@ public sealed class MichaelBehaviour : MonoBehaviour, ITalkTarget
     }
     void Update()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!animator)return;animator.SetBool("walkForward",walkForward);animator.SetBool("isWalking",!InConversation);animator.speed=walkFaster&&!InConversation?fastMultiplier:1;
         if(InConversation||waypoints==null||waypoints.Length==0||!waypoints[next])return;
         var direction=waypoints[next].position-transform.position;direction.y=0;

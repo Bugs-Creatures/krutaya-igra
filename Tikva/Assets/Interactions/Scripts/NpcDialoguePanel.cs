@@ -54,6 +54,7 @@ public sealed class NpcDialoguePanel : MonoBehaviour
     }
     void Update()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!IsOpen)return;
         AdvanceTypewriter(Time.unscaledDeltaTime);label.maxVisibleCharacters=(int)letters;if(letters<phrase.Length)return;
         if(choice!=null)

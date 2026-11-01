@@ -77,6 +77,7 @@ public sealed class ShopDialogue : MonoBehaviour, ITalkTarget
     }
     void Update()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!player)return;
         cooldown=Mathf.Max(0,cooldown-Time.deltaTime);
         if(!panel.gameObject.activeSelf)return;
@@ -100,6 +101,7 @@ public sealed class ShopDialogue : MonoBehaviour, ITalkTarget
     }
     void LateUpdate()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!player)return;
         if(player.ShopReturning)return;
         bool inside=Inside(player.transform.position);

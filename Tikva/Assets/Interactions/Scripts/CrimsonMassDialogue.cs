@@ -104,16 +104,17 @@ public sealed class CrimsonMassDialogue : MonoBehaviour, ITalkTarget
         FitVisibleSpeech();
         if(body.maxVisibleCharacters<body.text.Length)return;
         lineComplete=true;changedFrame=Time.frameCount;
-        if(farewellVisible){closeAt=Time.unscaledTime+farewellHold;return;}
+        if(farewellVisible){closeAt=PauseMenu.GameplayUnscaledTime+farewellHold;return;}
         if(CurrentLine==lines.Length-1)
-        {HasCompleted=true;GiveAxe();closeAt=Time.unscaledTime+finalLineHold;}
+        {HasCompleted=true;GiveAxe();closeAt=PauseMenu.GameplayUnscaledTime+finalLineHold;}
         else answerButton.gameObject.SetActive(true);
     }
     void Update()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!IsOpen&&!farewellVisible)return;
         UpdateTyping(Time.unscaledDeltaTime);
-        if(lineComplete&&(farewellVisible||CurrentLine==lines.Length-1)&&Time.unscaledTime>=closeAt)
+        if(lineComplete&&(farewellVisible||CurrentLine==lines.Length-1)&&PauseMenu.GameplayUnscaledTime>=closeAt)
         {if(IsOpen)End();else HideFarewell();return;}
         if(farewellVisible)return;
         var mouse=Mouse.current;bool hover=answerButton.gameObject.activeSelf&&mouse!=null&&GameHudUI.Hit(answerButton,mouse.position.ReadValue());
@@ -128,6 +129,7 @@ public sealed class CrimsonMassDialogue : MonoBehaviour, ITalkTarget
     }
     void LateUpdate()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!IsOpen&&!farewellVisible)return;
         // Rebuild the original mesh before applying offsets, so the wave never accumulates.
         body.ForceMeshUpdate();var info=body.textInfo;
@@ -135,7 +137,7 @@ public sealed class CrimsonMassDialogue : MonoBehaviour, ITalkTarget
         {
             var character=info.characterInfo[i];if(!character.isVisible)continue;
             var vertices=info.meshInfo[character.materialReferenceIndex].vertices;
-            var offset=Vector3.up*Mathf.Sin(Time.unscaledTime*waveSpeed-i*waveCharacterPhase)*waveAmplitude;
+            var offset=Vector3.up*Mathf.Sin(PauseMenu.GameplayUnscaledTime*waveSpeed-i*waveCharacterPhase)*waveAmplitude;
             for(int n=0;n<4;n++)vertices[character.vertexIndex+n]+=offset;
         }
         body.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);

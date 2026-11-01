@@ -117,6 +117,7 @@ public sealed class DrunkDialogue : MonoBehaviour, ITalkTarget
     }
     void Update()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!player||!panel.gameObject.activeSelf)return;
         letters+=lettersPerSecond*Time.unscaledDeltaTime;text.maxVisibleCharacters=(int)letters;
         if(letters<line.Length)return;
