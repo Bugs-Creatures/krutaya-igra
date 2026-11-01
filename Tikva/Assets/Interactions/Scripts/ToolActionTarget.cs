@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum ToolActionKind { BreakChains, EnterBasement, RemovePanelCover, CutPanelWire }
+public enum ToolActionKind { BreakChains, EnterBasement, RemovePanelCover, CutPanelWire, ExitBasement }
 
 public sealed class ToolActionTarget : MonoBehaviour
 {
@@ -21,6 +21,13 @@ public sealed class ToolActionTarget : MonoBehaviour
     public bool TryUse(PlayerInteraction interaction)
     {
         LastFailure=null;
+        if(action==ToolActionKind.ExitBasement)
+        {
+            if(!destination){LastFailure="Точка выхода не назначена.";return false;}
+            interaction.player.TeleportFirstPerson(destination);
+            interaction.player.DisableCamerasPermanently();
+            return true;
+        }
         if(action==ToolActionKind.RemovePanelCover||action==ToolActionKind.CutPanelWire)
         {
             if(!electricalPanel)return false;
