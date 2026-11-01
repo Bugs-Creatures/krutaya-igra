@@ -23,6 +23,7 @@ public sealed class InteractionObject : MonoBehaviour
     [Header("Held in first person - camera anchor")]
     public Vector3 firstPersonHeldPosition;
     public Vector3 firstPersonHeldRotation;
+    [Min(.05f)] public float firstPersonHeldScale=1;
     [Header("Door")]
     public Transform hinge;
     public Vector3 hingeAxis=Vector3.up;
@@ -123,7 +124,8 @@ public sealed class InteractionObject : MonoBehaviour
         transform.localPosition=firstPerson?firstPersonHeldPosition:thirdPersonHeldPosition;
         transform.localRotation=Quaternion.Euler(firstPerson?firstPersonHeldRotation:thirdPersonHeldRotation);
         var scale=anchor.lossyScale;
-        transform.localScale=new Vector3(worldScale.x/scale.x,worldScale.y/scale.y,worldScale.z/scale.z);
+        float displayScale=firstPerson?firstPersonHeldScale:1;
+        transform.localScale=new Vector3(worldScale.x/scale.x,worldScale.y/scale.y,worldScale.z/scale.z)*displayScale;
         if(body){body.position=transform.position;body.rotation=transform.rotation;}
     }
     public void Drop(Vector3 point,Collider[] playerColliders)

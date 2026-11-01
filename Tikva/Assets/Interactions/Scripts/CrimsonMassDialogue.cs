@@ -145,8 +145,34 @@ public sealed class CrimsonMassDialogue : MonoBehaviour, ITalkTarget
         if(RewardGiven||!axeReward)return;RewardGiven=true;
         var player=interaction.player;var direction=Vector3.ProjectOnPlane(player.transform.position-transform.position,Vector3.up).normalized;
         if(direction.sqrMagnitude<.01f)direction=transform.forward;
-        var point=transform.position+direction*1.2f+Vector3.up*1.2f;point.y=Mathf.Max(point.y,player.transform.position.y+.5f);
+        var point=FindRewardDropPoint(direction);
         axeReward.transform.position=point;axeReward.gameObject.SetActive(true);axeReward.Attach(transform);axeReward.Drop(point,GetComponentsInChildren<Collider>());axeReward.RecordNpcDrop();
+    }
+    Vector3 FindRewardDropPoint(Vector3 towardsPlayer)
+    {
+        var bounds=new Bounds(transform.position,Vector3.zero);
+        foreach(var collider in GetComponentsInChildren<Collider>())if(!collider.isTrigger)bounds.Encapsulate(collider.bounds);
+        foreach(float angle in new[]{0f,35,-35,70,-70,110,-110,180})
+        {
+            var direction=Quaternion.AngleAxis(angle,Vector3.up)*towardsPlayer;
+            float reach=Mathf.Abs(direction.x)*bounds.extents.x+Mathf.Abs(direction.z)*bounds.extents.z;
+            var point=new Vector3(bounds.center.x,transform.position.y,bounds.center.z)+direction*Mathf.Max(1.6f,reach+.65f);
+            var hits=Physics.RaycastAll(point+Vector3.up*2,Vector3.down,5,~0,QueryTriggerInteraction.Ignore);
+            System.Array.Sort(hits,(a,b)=>a.distance.CompareTo(b.distance));
+            bool ground=false;
+            foreach(var hit in hits)
+            {
+                if(hit.transform.IsChildOf(transform)||hit.transform.IsChildOf(interaction.player.transform)||hit.transform.IsChildOf(axeReward.transform))continue;
+                if(hit.normal.y<.6f)continue;
+                point.y=hit.point.y+.65f;ground=true;break;
+            }
+            if(!ground)continue;
+            bool free=true;
+            foreach(var collider in Physics.OverlapSphere(point,.35f,~0,QueryTriggerInteraction.Ignore))
+                if(!collider.transform.IsChildOf(axeReward.transform)){free=false;break;}
+            if(free)return point;
+        }
+        return transform.position+towardsPlayer*2+Vector3.up;
     }
     public void End()
     {

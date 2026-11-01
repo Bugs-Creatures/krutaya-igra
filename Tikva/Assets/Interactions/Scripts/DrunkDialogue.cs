@@ -19,6 +19,10 @@ public sealed class DrunkDialogue : MonoBehaviour, ITalkTarget
     public bool given;
     public float lettersPerSecond=35;
     [Min(0)] public float rewardThrow=1.2f;
+    [Header("Bottle in NPC hand")]
+    public Transform bottleGrip;
+    public Vector3 bottleLocalPosition;
+    public Vector3 bottleLocalRotation;
     PlayerInteraction interaction;
     SurvivalPlayerController player;
     RectTransform panel,speechBackground,giveButton,keepButton;
@@ -91,7 +95,19 @@ public sealed class DrunkDialogue : MonoBehaviour, ITalkTarget
     void Give()
     {
         var bottle=interaction.TakeHeld();given=true;
-        if(hand)bottle.SetGrip(hand,false);else bottle.gameObject.SetActive(false);
+        if(hand)
+        {
+            if(!bottleGrip)
+            {
+                bottleGrip=new GameObject("VodkaGrip").transform;bottleGrip.SetParent(hand,false);
+                bottleGrip.localPosition=new Vector3(0,.09f,0);
+            }
+            bottle.SetGrip(bottleGrip,false);
+            bottle.transform.localPosition=bottleLocalPosition;bottle.transform.localRotation=Quaternion.Euler(bottleLocalRotation);
+            var bottleBody=bottle.GetComponent<Rigidbody>();
+            if(bottleBody){bottleBody.position=bottle.transform.position;bottleBody.rotation=bottle.transform.rotation;}
+        }
+        else bottle.gameObject.SetActive(false);
         if(!reward)return;
         var point=transform.position+transform.forward*.6f+Vector3.up*1.1f;
         reward.transform.position=point;reward.gameObject.SetActive(true);
