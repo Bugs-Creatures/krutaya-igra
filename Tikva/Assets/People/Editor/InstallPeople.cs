@@ -24,15 +24,14 @@ public static class InstallPeople
     {
         ("Player", null, null, null, new string[0]),
         ("salesman", new Color(.30f,.43f,.66f), new Color(.38f,.36f,.34f), new Color(1f,.93f,.88f), new[]{"Acc_ClerkCap"}),
-        ("drunk", new Color(.42f,.42f,.30f), new Color(.30f,.28f,.25f), new Color(1f,.84f,.80f), new[]{"Acc_Ushanka"}),
-        ("Michael", new Color(.62f,.16f,.14f), new Color(.30f,.34f,.48f), new Color(.92f,.80f,.70f), new[]{"Acc_FlatCap","Acc_Moustache"}),
+        ("drunk", new Color(.42f,.42f,.30f), new Color(.30f,.28f,.25f), new Color(1f,.84f,.80f), new string[0]),
+        ("Michael", new Color(.62f,.16f,.14f), new Color(.30f,.34f,.48f), new Color(.92f,.80f,.70f), new[]{"Acc_Moustache"}),
         ("Zaika", new Color(.24f,.46f,.32f), new Color(.52f,.50f,.46f), new Color(1f,.96f,.93f), new[]{"Acc_Glasses"}),
     };
     // accessory materials: colour, metallic, smoothness
     static readonly Dictionary<string,(Color colour,float metal,float smooth)> Cloth=new()
     {
-        ["Acc_Tweed"]=(new Color(.33f,.31f,.27f),0,.1f),["Acc_Hair"]=(new Color(.16f,.11f,.08f),0,.25f),
-        ["Acc_Leather"]=(new Color(.22f,.17f,.13f),0,.35f),["Acc_Fur"]=(new Color(.42f,.36f,.30f),0,.05f),
+        ["Acc_Hair"]=(new Color(.16f,.11f,.08f),0,.25f),
         ["Acc_Frame"]=(new Color(.08f,.07f,.06f),.6f,.6f),["Acc_White"]=(new Color(.92f,.92f,.90f),0,.2f),
     };
 

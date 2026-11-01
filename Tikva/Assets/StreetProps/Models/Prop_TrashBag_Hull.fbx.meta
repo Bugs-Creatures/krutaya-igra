@@ -1,41 +1,11 @@
 fileFormatVersion: 2
-guid: 9ac93b4a9ef1e804d8677705f2f5b3d6
+guid: 12745f56fe2ee9a4096d1707bcd68a9a
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Acc_Frame
-    second: {fileID: 2100000, guid: 8e7799f144d67de49aa1927aa92b47f4, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Acc_Fur
-    second: {fileID: 2100000, guid: d2f41722e326bd24b990fa71e94d52d0, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Acc_Hair
-    second: {fileID: 2100000, guid: 0730d4757b88dc84880324d0d3fdfad8, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Acc_Leather
-    second: {fileID: 2100000, guid: d30b0db536a300d4e8098be32b84fffe, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Acc_Tweed
-    second: {fileID: 2100000, guid: 04118153fd263c242849a5fafef64175, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Acc_White
-    second: {fileID: 2100000, guid: 49325b6c71b2076458043892d40e45e1, type: 2}
+  externalObjects: {}
   materials:
-    materialImportMode: 1
+    materialImportMode: 2
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -115,7 +85,7 @@ ModelImporter:
     normalSmoothingSource: 0
     calculateBlendshapeNormalsDeltaFromImportedNormals: 0
   referencedClips: []
-  importAnimation: 0
+  importAnimation: 1
   humanDescription:
     serializedVersion: 3
     human: []
@@ -134,7 +104,7 @@ ModelImporter:
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
