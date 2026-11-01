@@ -13,6 +13,7 @@ public sealed class ToolActionTarget : MonoBehaviour
     [Header("Chains")]
     public GameObject intactVisual;
     public GameObject brokenVisual;
+    public bool removeIntactVisualOnBreak;
     [Header("Basement entrance")]
     public ToolActionTarget chains;
     public Transform destination;
@@ -62,7 +63,12 @@ public sealed class ToolActionTarget : MonoBehaviour
         {
             IsBroken=true;
             var target=GetComponent<InteractionObject>();if(target&&target.Outline)target.Outline.Show(false,Color.red);
-            if(intactVisual)intactVisual.SetActive(false);if(brokenVisual)brokenVisual.SetActive(true);
+            if(intactVisual)
+            {
+                intactVisual.SetActive(false);
+                if(removeIntactVisualOnBreak)Destroy(intactVisual);
+            }
+            if(brokenVisual)brokenVisual.SetActive(true);
             foreach(var collider in GetComponentsInChildren<Collider>(true))collider.enabled=false;
             if(target)target.enabled=false;
             return true;

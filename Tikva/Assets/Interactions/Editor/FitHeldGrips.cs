@@ -13,7 +13,7 @@ public static class FitHeldGrips
         ("Плоскогубцы",Vector3.back,Vector3.up,.24f,new(-1,.12f,0),new(-.45f,.8f,.25f),new(0,0,-1),1),
         ("screwdriver",Vector3.forward,Vector3.up,.21f,new(-1,.12f,0),new(-.35f,.85f,.3f),new(0,0,-1),1),
         ("Лопата",Vector3.back,Vector3.up,.16f,new(-1,.15f,0),new(-.42f,.86f,.25f),Vector3.forward,.68f),
-        ("crowbar",Vector3.forward,Vector3.up,.22f,new(-1,.12f,0),new(-.35f,.9f,.25f),new(-1,0,0),.9f),
+        ("crowbar",Vector3.forward,Vector3.up,.22f,new(0,1,-.12f),new(-.35f,.9f,.25f),new(-1,0,0),.9f),
         ("vodka",Vector3.up,Vector3.back,.35f,new(-1,.12f,0),Vector3.up,Vector3.back,1),
         ("rope",Vector3.right,Vector3.up,.12f,Vector3.up,new(.95f,.2f,0),Vector3.back,1),
         ("Axe",Vector3.forward,Vector3.up,.18f,new(-1,.12f,0),new(-.25f,.96f,.08f),Vector3.left,1),
@@ -77,6 +77,15 @@ public static class FitHeldGrips
         var pts=ModelPoints(item);var lo=pts.Aggregate(Vector3.Min);var hi=pts.Aggregate(Vector3.Max);var centre=(lo+hi)/2;
         float min=pts.Min(p=>Vector3.Dot(p,g.axis)),max=pts.Max(p=>Vector3.Dot(p,g.axis));
         var grip=centre+g.axis*(Mathf.Lerp(min,max,g.grip)-Vector3.Dot(centre,g.axis));
+        if(item.name=="crowbar")
+        {
+            // The hook bends away from the shaft: the overall bounds centre is
+            // several centimetres off the actual metal gripped by the palm.
+            float along=Mathf.Lerp(min,max,g.grip);
+            float nearest=pts.Min(p=>Mathf.Abs(Vector3.Dot(p,g.axis)-along));
+            var ring=pts.Where(p=>Mathf.Abs(Vector3.Dot(p,g.axis)-along)<nearest+.002f).ToArray();
+            grip=ring.Aggregate(Vector3.zero,(sum,p)=>sum+p)/ring.Length;
+        }
         Quaternion Rotation(Vector3 end,Vector3 face)=>Quaternion.LookRotation(end,face)*Quaternion.Inverse(Quaternion.LookRotation(g.axis,g.flat));
         var tp=Rotation(g.tp,Vector3.forward);var fp=Rotation(g.fp,g.fpFlat);
         var handScale=hand.lossyScale;
@@ -99,6 +108,7 @@ public static class FitHeldGrips
         // Long tools intentionally extend below the view: show their working heads close to the eye.
         if(item.name=="Axe")displayCentre=new Vector3(.25f,-.23f,.52f);
         if(item.name=="Лопата")displayCentre=new Vector3(.37f,-.34f,.58f);
+        if(item.name=="crowbar")displayCentre=new Vector3(.27f,-.16f,.57f);
         item.firstPersonHeldPosition=displayCentre-fp*centre*g.fpScale-fpAnchor.localPosition;
     }
 }

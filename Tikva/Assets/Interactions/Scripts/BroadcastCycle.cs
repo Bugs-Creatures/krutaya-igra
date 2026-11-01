@@ -117,8 +117,8 @@ public sealed class BroadcastCycle : MonoBehaviour
     void SyncMusic()
     {
         if(suspended)return;
-        if(Phase==BroadcastPhase.OnAir)Resume(onAirSource,onAirMusic,ref airPaused);
-        else Resume(advertisementSource,advertisementMusic,ref adPaused);
+        // The soundtrack continues through breaks, blind zones and permanent off-air.
+        Resume(onAirSource,onAirMusic,ref airPaused);
     }
     static void Resume(AudioSource source,AudioClip clip,ref bool paused)
     {
@@ -129,11 +129,10 @@ public sealed class BroadcastCycle : MonoBehaviour
     }
     void UpdateMusic(float seconds)
     {
-        bool air=!suspended&&Phase==BroadcastPhase.OnAir;
-        bool ad=!suspended&&!air;
+        bool air=!suspended;
         float duck=announcerSource&&announcerSource.isPlaying?announcerMusicDuck:1;
         Fade(onAirSource,air?musicVolume*duck:0,seconds,!air,ref airPaused);
-        Fade(advertisementSource,ad?musicVolume:0,seconds,!ad,ref adPaused);
+        Fade(advertisementSource,0,seconds,true,ref adPaused);
     }
     void Fade(AudioSource source,float target,float seconds,bool pause,ref bool paused)
     {
