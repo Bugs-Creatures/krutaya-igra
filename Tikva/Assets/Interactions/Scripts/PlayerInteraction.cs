@@ -54,7 +54,22 @@ public sealed class PlayerInteraction : MonoBehaviour
         // PhysX ClosestPoint does not support non-convex MeshColliders. Returning
         // the query point there would accidentally make every distance zero.
         var point=collider is MeshCollider mesh&&!mesh.convex?collider.bounds.ClosestPoint(origin):collider?collider.ClosestPoint(origin):item.transform.position;
-        return Vector3.Distance(origin,point)<=item.reachDistance;
+        return Vector3.Distance(origin,point)<=item.reachDistance&&(item.kind!=InteractionKind.Talk||HasTalkLineOfSight(item));
+    }
+    // Camera visibility alone is insufficient: the player must also have an unobstructed path to the NPC.
+    public bool HasTalkLineOfSight(InteractionObject target)
+    {
+        var origin=transform.position+Vector3.up*1.2f;
+        var destination=target.transform.position+Vector3.up*1.2f;
+        var delta=destination-origin;
+        foreach(var hit in Physics.RaycastAll(origin,delta.normalized,delta.magnitude,~(1<<2),QueryTriggerInteraction.Ignore))
+        {
+            if(hit.transform.IsChildOf(transform)||hit.transform.IsChildOf(target.transform))continue;
+            var item=hit.collider.GetComponentInParent<InteractionObject>();
+            if(item&&(item.IsHeld||item.kind==InteractionKind.Talk))continue;
+            return false;
+        }
+        return true;
     }
     public InteractionObject TargetAt(Ray ray)
     {
