@@ -13,6 +13,7 @@ public sealed class CrimsonDialogueLine
 public sealed class CrimsonMassDialogue : MonoBehaviour, ITalkTarget
 {
     public InteractionObject axeReward;
+    public TownMonsterReveal townReveal;
     public Color textColor=new Color(.9f,.14f,.13f);
     [Min(1)] public float lettersPerSecond=35;
     [Min(0)] public float waveAmplitude=2;
@@ -183,12 +184,17 @@ public sealed class CrimsonMassDialogue : MonoBehaviour, ITalkTarget
         {interaction.player.dialogueLocked=false;interaction.player.dialogueClickFrame=Time.frameCount;}
         Cursor.lockState=oldLock;Cursor.visible=oldVisible;
         if(interaction&&interaction.prompt)interaction.prompt.UseDefaultCursor();
+        if(HasCompleted&&isActiveAndEnabled&&townReveal)townReveal.Reveal();
     }
-    void ShowFarewell()
+    void ShowFarewell()=>SayAmbient("Удачи.");
+    public void SayAmbient(string phrase)
     {
-        if(farewellVisible)return;
+        Ensure();
+        var player=interaction.player;
+        if(IsOpen||player.dialogueLocked||player.modalInputLocked||player.ShopReturning)return;
+        if(farewellVisible&&body.text==phrase)return;
         farewellVisible=true;panel.gameObject.SetActive(true);answerButton.gameObject.SetActive(false);
-        body.text="Удачи.";body.maxVisibleCharacters=0;body.color=textColor;speaker.color=textColor;
+        body.text=phrase;body.maxVisibleCharacters=0;body.color=textColor;speaker.color=textColor;
         revealedCharacters=0;lineComplete=false;FitSpeech(body.text);
     }
     void HideFarewell(){farewellVisible=false;if(panel)panel.gameObject.SetActive(false);}

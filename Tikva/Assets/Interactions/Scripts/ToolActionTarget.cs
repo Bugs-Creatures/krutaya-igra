@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum ToolActionKind { BreakChains, EnterBasement, RemovePanelCover, CutPanelWire, ExitBasement, DigSoil }
+public enum ToolActionKind { BreakChains, EnterBasement, RemovePanelCover, CutPanelWire, ExitBasement, DigSoil, ChopTree }
 
 public sealed class ToolActionTarget : MonoBehaviour
 {
@@ -9,6 +9,7 @@ public sealed class ToolActionTarget : MonoBehaviour
     public string missingToolText;
     [Header("Electrical panel")]
     public ElectricalPanel electricalPanel;
+    public BreakableTree breakableTree;
     [Header("Chains")]
     public GameObject intactVisual;
     public GameObject brokenVisual;
@@ -22,6 +23,12 @@ public sealed class ToolActionTarget : MonoBehaviour
     public bool TryUse(PlayerInteraction interaction)
     {
         LastFailure=null;
+        if(action==ToolActionKind.ChopTree)
+        {
+            if(!breakableTree)return false;
+            bool succeeded=breakableTree.TryChop(interaction,out string failure);
+            LastFailure=failure;return succeeded;
+        }
         if(action==ToolActionKind.DigSoil)
         {
             var target=GetComponent<InteractionObject>();

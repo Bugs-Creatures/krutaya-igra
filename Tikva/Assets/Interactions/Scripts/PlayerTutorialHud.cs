@@ -102,8 +102,11 @@ public sealed class PlayerTutorialHud : MonoBehaviour
     public void Dismiss(){if(showing)closing=true;}
     void FinishHints()
     {
-        showing=false;closing=false;popup.SetActive(false);pages.Clear();player.modalInputLocked=false;player.dialogueClickFrame=Time.frameCount;
-        Cursor.lockState=player.EffectiveFirstPerson?oldLock:CursorLockMode.None;Cursor.visible=player.EffectiveFirstPerson?oldVisible:true;interaction.prompt.UseDefaultCursor();
+        showing=false;closing=false;if(popup)popup.SetActive(false);pages.Clear();
+        if(!player)return;
+        player.modalInputLocked=false;player.dialogueClickFrame=Time.frameCount;
+        Cursor.lockState=player.EffectiveFirstPerson?oldLock:CursorLockMode.None;Cursor.visible=player.EffectiveFirstPerson?oldVisible:true;
+        if(interaction&&interaction.prompt)interaction.prompt.UseDefaultCursor();
     }
     void OnDisable(){if(showing)FinishHints();}
 }

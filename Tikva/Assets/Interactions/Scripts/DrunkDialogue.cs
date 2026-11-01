@@ -9,7 +9,7 @@ public sealed class DrunkDialogue : MonoBehaviour, ITalkTarget
 {
     public InteractionObject wantedItem;
     public InteractionObject reward;
-    public string speaker="Мужик";
+    public string speaker="Сосед";
     public string askLine="Эх, водочки бы сейчас...";
     public string offerLine="О, водочка! Угостишь?";
     public string giveChoice="Отдать водку";
@@ -114,6 +114,13 @@ public sealed class DrunkDialogue : MonoBehaviour, ITalkTarget
         var body=reward.GetComponent<Rigidbody>();
         if(body){body.position=point;body.isKinematic=false;body.useGravity=true;body.linearVelocity=(transform.forward+Vector3.up)*rewardThrow;}
         reward.RecordNpcDrop();
+    }
+    public void DropHeldBottle()
+    {
+        if(!wantedItem||!wantedItem.IsHeld||!wantedItem.transform.IsChildOf(transform))return;
+        var point=wantedItem.transform.position+transform.right*.12f;
+        wantedItem.Drop(point,GetComponentsInChildren<Collider>());
+        wantedItem.RecordNpcDrop();
     }
     void Update()
     {
