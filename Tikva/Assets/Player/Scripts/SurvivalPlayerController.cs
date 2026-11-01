@@ -113,6 +113,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     }
     void Update()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(cameraRig&&cameraRig.CamerasDisabled)firstPerson=true;
         if(modalInputLocked||dialogueClickFrame==Time.frameCount)
         {
@@ -123,7 +124,6 @@ public sealed class SurvivalPlayerController : MonoBehaviour
         if(dialogueLocked){Move(Vector2.zero,Vector2.zero,false,false,Time.deltaTime);return;}
         if(appliedMode!=EffectiveFirstPerson)ApplyMode();
         var k=Keyboard.current;var m=Mouse.current;if(k==null)return;
-        if(k.escapeKey.wasPressedThisFrame){Cursor.lockState=CursorLockMode.None;Cursor.visible=true;}
         if(EffectiveFirstPerson && m!=null && m.leftButton.wasPressedThisFrame){Cursor.lockState=CursorLockMode.Locked;Cursor.visible=false;}
         Vector2 axes=new Vector2((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));
         Vector2 look=EffectiveFirstPerson && Cursor.lockState==CursorLockMode.Locked && m!=null?m.delta.ReadValue():Vector2.zero;

@@ -15,6 +15,7 @@ public sealed class CameraOnlyCanvas : MonoBehaviour
     }
     void LateUpdate()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         bool visible=player&&!player.EffectiveFirstPerson&&!player.modalInputLocked;
         if(visible)canvas.enabled=true;
         group.alpha=Mathf.MoveTowards(group.alpha,visible?1:0,Time.unscaledDeltaTime/Mathf.Max(.01f,fadeDuration));

@@ -74,6 +74,7 @@ public sealed class PlayerInteraction : MonoBehaviour
     }
     public bool TryInteract(InteractionObject item)
     {
+        if(PauseMenu.BlocksGameplayInput)return false;
         if(player.modalInputLocked||player.dialogueLocked||!item||!item.isActiveAndEnabled||!item.Allowed(player.EffectiveFirstPerson)||!InReach(item))return false;
         if(item.kind==InteractionKind.ToolAction){var action=item.GetComponent<ToolActionTarget>();return action&&action.TryUse(this);}
         if(item.kind==InteractionKind.Talk){var talk=item.GetComponent<ITalkTarget>();if(talk!=null)talk.Talk();return true;}
@@ -200,6 +201,7 @@ public sealed class PlayerInteraction : MonoBehaviour
     }
     void LateUpdate()
     {
+        if(PauseMenu.BlocksGameplayInput){SetHovered(null);return;}
         EnforceHeldRules();
         if(player.modalInputLocked||player.dialogueLocked||player.ShopReturning||player.dialogueClickFrame==Time.frameCount){SetHovered(null);return;}
         RefreshHeldGrip();var camera=player.cameraRig.output;UpdateFirstPersonHeldMotion(camera);var mouse=Mouse.current;

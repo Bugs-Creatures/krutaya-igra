@@ -21,6 +21,7 @@ public sealed class PlayerMapInventory : MonoBehaviour
     void Start(){interaction=GetComponent<PlayerInteraction>();}
     void Update()
     {
+        if(PauseMenu.BlocksGameplayInput)return;
         if(!interaction)return;
         if(!IsOpen&&HasMap&&Keyboard.current!=null&&Keyboard.current.mKey.wasPressedThisFrame&&!interaction.player.modalInputLocked&&!interaction.player.dialogueLocked&&!interaction.player.ShopReturning&&interaction.player.dialogueClickFrame!=Time.frameCount)Open();
         if(!IsOpen)return;
@@ -36,7 +37,11 @@ public sealed class PlayerMapInventory : MonoBehaviour
         oldLock=Cursor.lockState;oldVisible=Cursor.visible;interaction.player.modalInputLocked=true;
         interaction.prompt.ClearFeedback();interaction.prompt.Present(null,Vector2.zero,false);Cursor.lockState=CursorLockMode.None;Cursor.visible=true;
         overlay.SetActive(true);group.alpha=0;
-        buttons=InputSystem.onAnyButtonPress.Call(control=>{if(Time.frameCount>openedFrame)Close();});
+        buttons=InputSystem.onAnyButtonPress.Call(control=>
+        {
+            if(PauseMenu.BlocksGameplayInput||control==Keyboard.current?.escapeKey)return;
+            if(Time.frameCount>openedFrame)Close();
+        });
     }
     void Build()
     {
