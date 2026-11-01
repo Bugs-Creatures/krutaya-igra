@@ -1,12 +1,14 @@
 using UnityEngine;
 
-public enum ToolActionKind { BreakChains, EnterBasement }
+public enum ToolActionKind { BreakChains, EnterBasement, RemovePanelCover, CutPanelWire }
 
 public sealed class ToolActionTarget : MonoBehaviour
 {
     public ToolActionKind action;
     public InteractionObject requiredTool;
     public string missingToolText;
+    [Header("Electrical panel")]
+    public ElectricalPanel electricalPanel;
     [Header("Chains")]
     public GameObject intactVisual;
     public GameObject brokenVisual;
@@ -19,6 +21,12 @@ public sealed class ToolActionTarget : MonoBehaviour
     public bool TryUse(PlayerInteraction interaction)
     {
         LastFailure=null;
+        if(action==ToolActionKind.RemovePanelCover||action==ToolActionKind.CutPanelWire)
+        {
+            if(!electricalPanel)return false;
+            bool succeeded=electricalPanel.TryUse(this,interaction,out string failure);
+            LastFailure=failure;return succeeded;
+        }
         if(action==ToolActionKind.EnterBasement&&chains&&!chains.IsBroken){LastFailure="Сначала сломайте цепи.";return false;}
         if(action==ToolActionKind.BreakChains&&IsBroken){LastFailure="Цепи уже сломаны.";return false;}
         if(!IsUnlocked&&(!requiredTool||interaction.heldItem!=requiredTool))

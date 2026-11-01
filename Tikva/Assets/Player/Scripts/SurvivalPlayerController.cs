@@ -51,7 +51,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     }
     [Header("Current right-hand item (empty when free)")]
     public string currentHeldItem="";
-    public bool EffectiveFirstPerson => firstPerson || (cameraRig && cameraRig.AutomaticFirstPerson);
+    public bool EffectiveFirstPerson => firstPerson || (cameraRig && (cameraRig.CamerasDisabled||cameraRig.AutomaticFirstPerson));
     public bool tankControlsIndoors=true;
     public bool tankControlsOutdoors=true;
     [Header("Movement")]
@@ -76,7 +76,13 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     bool inputLatched,latchedTank;
     bool wasInAirAnimation;
     bool jumpInProgress;
-    public void SetFirstPerson(bool value){firstPerson=value;if(Application.isPlaying)ApplyMode();}
+    public void SetFirstPerson(bool value){firstPerson=value||(cameraRig&&cameraRig.CamerasDisabled);if(Application.isPlaying)ApplyMode();}
+    public void DisableCamerasPermanently()
+    {
+        if(cameraRig)cameraRig.DisableCamerasPermanently();
+        SetFirstPerson(true);
+        if(cameraRig)cameraRig.UpdateView(0,pitch);
+    }
     public void Teleport(Vector3 point)
     {
         var cc=GetComponent<CharacterController>();cc.enabled=false;transform.position=point;cc.enabled=true;verticalSpeed=0;inputLatched=false;heldForward=Vector3.zero;
@@ -107,6 +113,7 @@ public sealed class SurvivalPlayerController : MonoBehaviour
     }
     void Update()
     {
+        if(cameraRig&&cameraRig.CamerasDisabled)firstPerson=true;
         if(modalInputLocked||dialogueClickFrame==Time.frameCount)
         {
             if(animator){animator.SetBool(walkingParameter,false);animator.SetBool("isWalkingBackward",false);animator.SetBool("isRunning",false);}

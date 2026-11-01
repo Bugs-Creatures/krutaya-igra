@@ -31,7 +31,8 @@ public sealed class SurvivalCameraRig : MonoBehaviour
     public float boundaryMargin=.6f;
     public float blindZoneMargin=.35f;
     public bool AutomaticFirstPerson {get;private set;}
-    public bool IsFirstPerson=>manualFirstPerson||AutomaticFirstPerson;
+    public bool CamerasDisabled {get;private set;}
+    public bool IsFirstPerson=>CamerasDisabled||manualFirstPerson||AutomaticFirstPerson;
     public bool IsIndoors {get;private set;}
     public Camera ActiveFixedCamera {get;private set;}
     public OutdoorTrackingCamera ActiveOutdoorCamera {get;private set;}
@@ -42,6 +43,7 @@ public sealed class SurvivalCameraRig : MonoBehaviour
     Camera previousShot;
     public void RefreshSelection()
     {
+        if(CamerasDisabled){ActiveFixedCamera=null;ActiveOutdoorCamera=null;return;}
         if(!target)return;
         Camera fallback=null;IsIndoors=false;
         foreach(var area in interiors)if(area && area.Contains(target.position)){IsIndoors=true;fallback=area.fallbackCamera;break;}
@@ -55,8 +57,15 @@ public sealed class SurvivalCameraRig : MonoBehaviour
         else ActiveFixedCamera=IsIndoors?fallback:null;
     }
     public void SetFirstPerson(bool value)=>manualFirstPerson=value;
+    public void DisableCamerasPermanently()
+    {
+        CamerasDisabled=true;AutomaticFirstPerson=false;
+        ActiveFixedCamera=null;ActiveOutdoorCamera=null;blind=null;
+        lostTime=visibleTime=0;
+    }
     void UpdateOutdoor(float dt)
     {
+        if(CamerasDisabled)return;
         holdTime+=dt;
         if(ActiveFixedCamera)
         {
